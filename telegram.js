@@ -5,7 +5,7 @@ const TELEGRAM_URL = 'https://api.telegram.org/bot' + process.env.BOT_SECRET;
 class Telegram {
 
     constructor() {
-        this.games = {"123": { players: [58968385] }}; // gameId: gameObj
+        this.games = {"123": { players: [{id: 58968385}] }}; // gameId: gameObj
         this.players = {58968385: "123"}; // userId: gameId
     }
 
@@ -22,11 +22,8 @@ class Telegram {
     }
 
     async sendMessageToGroup(message) {
-        console.log("in message");
         const text = '*' + message.from.username + ":*\n" + message.text;
         const game = this.getGame(message);
-        console.log(game);
-        console.log(text);
         for (let player of game.players) {
             if (player.id === message.from.id) { // TODO: diverso
                 await this.tg('/sendMessage', {
