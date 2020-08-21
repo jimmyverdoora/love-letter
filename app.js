@@ -14,7 +14,7 @@ app.use(parser.json());
 app.use(cors());
 
 app.post(WEBHOOK_URL, (req, res) => {
-    console.log(req.data);
+    console.log(req.body);
     res.status(200).send();
 });
 
