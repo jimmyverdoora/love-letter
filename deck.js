@@ -1,4 +1,4 @@
-module.exports = () => [
+const generateDeck = () => [
     // {
     //     id: '0a',
     //     name: 'Spia',
@@ -95,3 +95,5 @@ module.exports = () => [
         number: 8
     }
 ]
+
+module.exports = generateDeck;
