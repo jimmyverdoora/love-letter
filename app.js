@@ -18,6 +18,6 @@ app.post(WEBHOOK_URL, (req, res) => {
     res.status(200).send();
 });
 
-app.listen(8443, () => {
+app.listen(443, () => {
   console.log('Listening to requests');
 });
