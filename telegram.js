@@ -23,9 +23,9 @@ class Telegram {
 
     async sendMessageToGroup(message) {
         const text = '*' + message.from.username + ":*\n" + message.text;
-        const game = this.getGame(body);
+        const game = this.getGame(message);
         for (let player of game.players) {
-            if (player.id === body.message.from.id) { // TODO: diverso
+            if (player.id === message.from.id) { // TODO: diverso
                 await this.tg('/sendMessage', {
                     chat_id: player.id,
                     text
