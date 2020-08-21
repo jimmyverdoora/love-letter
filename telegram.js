@@ -28,7 +28,7 @@ class Telegram {
             if (player.id === message.from.id) { // TODO: diverso
                 await this.tg('/sendMessage', {
                     chat_id: player.id,
-                    text
+                    text,
                     parse_mode: 'MarkdownV2'
                 })
             }
