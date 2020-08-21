@@ -29,6 +29,7 @@ class Telegram {
                 await this.tg('/sendMessage', {
                     chat_id: player.id,
                     text
+                    parse_mode: 'MarkdownV2'
                 })
             }
         }
