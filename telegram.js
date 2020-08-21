@@ -1,7 +1,6 @@
 const axios = require('axios');
 
 const TELEGRAM_URL = 'https://api.telegram.org/bot' + process.env.BOT_SECRET;
-const WEBHOOK_PATH = '/api/' + process.env.APP_SECRET;
 
 class Telegram {
 
@@ -10,4 +9,4 @@ class Telegram {
     }
 }
 
-module.exports = { Telegram, WEBHOOK_PATH };
+module.exports = Telegram;
