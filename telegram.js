@@ -22,7 +22,7 @@ class Telegram {
     }
 
     async sendMessageToGroup(message) {
-        text = '*' + message.from.username + ":*\n" + message.text;
+        const text = '*' + message.from.username + ":*\n" + message.text;
         const game = this.getGame(body);
         for (let player of game.players) {
             if (player.id === body.message.from.id) { // TODO: diverso
