@@ -5,8 +5,8 @@ const TELEGRAM_URL = 'https://api.telegram.org/bot' + process.env.BOT_SECRET;
 class Telegram {
 
     constructor() {
-        this.games = {}; // gameId: gameObj
-        this.players = {}; // userId: gameId
+        this.games = {"123": { players: [58968385] }}; // gameId: gameObj
+        this.players = {58968385: "123"}; // userId: gameId
     }
 
     async tg(path, payload) {
