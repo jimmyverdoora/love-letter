@@ -81,9 +81,9 @@ class Telegram {
         } else if (a > 0.4) {
             return await this.sendMessage(message.from.id, "FOOL OF A TUC");
         } else if (a > 0.2) {
-            return await this.sendMessage(message.from.id, message.from.text + " sto cazzo");
+            return await this.sendMessage(message.from.id, message.text + " sto cazzo");
         } else {
-            return await this.sendMessage(message.from.id, message.from.text + " sarai tu dio tricheco");
+            return await this.sendMessage(message.from.id, message.text + " sarai tu dio tricheco");
         }
     }
 }
