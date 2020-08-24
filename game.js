@@ -9,10 +9,10 @@ class GameManager {
         return {
             id: gameId,
             deck,
-            state: 'open',
+            state: 'open', // open, closed
             players: [],
             nPlayers,
-            discardedCard: null;
+            discardedCard: null
         }
     }
 
@@ -20,10 +20,12 @@ class GameManager {
         return {
             id,
             name,
+            state, // in, out, protected
             hand: [],
             pile: [],
             points: 0
         }
     }
-
 }
+
+module.exports = GameManager;
