@@ -3,8 +3,11 @@ const generateDeck = require('./deck');
 
 class GameManager {
 
-    createNewGame(nPlayers) {
-        const gameId = uuidv4();
+    createGameId() {
+        return uuidv4();
+    }
+
+    createNewGame(nPlayers, gameId) {
         const deck = generateDeck();
         return {
             id: gameId,
@@ -12,6 +15,7 @@ class GameManager {
             state: 'open', // open, closed
             players: [],
             nPlayers,
+            activePlayer: null,
             discardedCard: null
         }
     }

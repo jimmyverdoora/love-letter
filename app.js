@@ -15,6 +15,7 @@ app.use(cors());
 
 app.post(WEBHOOK_URL, async (req, res) => {
     await telegram.elaborate(req.body);
+    console.log(telegram);
     res.status(200).send();
 });
 
