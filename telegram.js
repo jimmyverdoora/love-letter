@@ -99,7 +99,7 @@ class Telegram {
     async negateThisBecauseAlreadyInGame(user) {
         return await this.sendMessage(user, "Non puoi creare una nuova " +
             "partita perché stai gia partecipando alla partita " +
-            this.players[user] + ". Se vuoi uscire usa il comando /exit");
+            this.players[user] + "\\. Se vuoi uscire usa il comando /exit");
     }
 
     async askForARoom(user) {
@@ -130,7 +130,7 @@ class Telegram {
             }
         } else {
             await this.sendMessage(user, "Mi dispiace, questa " +
-                "partita non esiste. Riprova ad incollare l'identificativo " +
+                "partita non esiste\\. Riprova ad incollare l'identificativo " +
                 "o esci usando /exit");
         }
     }
