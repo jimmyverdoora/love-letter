@@ -162,6 +162,9 @@ class Telegram {
     async sendMessageToGroup(message) {
         const text = '*' + message.from.username + ":*\n" + message.text;
         const game = this.getGame(message);
+        if (!game) {
+            return;
+        }
         for (let player of game.players) {
             if (player.id !== message.from.id) {
                 await this.sendMessage(player.id, text);
