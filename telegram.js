@@ -21,11 +21,12 @@ class Telegram {
     }
 
     async sendMessage(to, text) {
-        return await this.tg('/sendMessage', {
+        const r = await this.tg('/sendMessage', {
             chat_id: to,
             text,
             parse_mode: 'MarkdownV2'
         })
+        console.log(r);
     }
 
     // -------------------------------------------------------------------------
@@ -127,7 +128,7 @@ class Telegram {
         } else {
             await this.sendMessage(user, "Mi dispiace, questa " +
                 "partita non esiste. Riprova ad incollare l'identificativo " +
-                "o esci usando exit");
+                "o esci usando /exit");
         }
     }
 
