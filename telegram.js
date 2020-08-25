@@ -8,7 +8,7 @@ class Telegram {
     constructor() {
         this.games = {}; // gameId: gameObj
         this.players = {}; // userId: gameId
-        this.waitingForEnter = [];
+        this.waitingForEnter = set();
         this.manager = new GameManager();
     }
 
@@ -40,7 +40,7 @@ class Telegram {
         //return await this.troll(body.message);
         if (body.message.text.charAt(0) === '/') {
             return await this.elaborateCommand(body.message);
-        } else if (this.waitingForEnter.includes(body.message.from.id)) {
+        } else if (this.waitingForEnter.has(body.message.from.id)) {
             return await this.tryJoinTheRoom(body.message);
         } else {
             return await this.sendMessageToGroup(body.message);
@@ -103,7 +103,7 @@ class Telegram {
     }
 
     async askForARoom(user) {
-        this.waitingForEnter.push(user);
+        this.waitingForEnter.add(user);
         return await this.sendMessage(user, "Incollami l'identificativo della" +
             " partita")
     }
@@ -112,10 +112,7 @@ class Telegram {
         const user = message.from.id;
         const game = this.games[message.text];
         if (game) {
-            const index = this.waitingForEnter.indexOf(user);
-            if (index > -1) {
-                this.waitingForEnter.splice(index, 1);
-            }
+            this.waitingForEnter.delete(user);
             this.players[user] = message.text;
             game.players.push(this.manager.createPlayer(
                 user, message.from.username
@@ -136,12 +133,7 @@ class Telegram {
     }
 
     async exit(user) {
-        if (this.waitingForEnter.includes(user)) {
-            const index = this.waitingForEnter.indexOf(user);
-            if (index > -1) {
-                this.waitingForEnter.splice(index, 1);
-            }
-        }
+        this.waitingForEnter.delete(user);
         const gameId = this.players[user];
         if (gameId) {
             const index2 = -1;
