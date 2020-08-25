@@ -35,7 +35,7 @@ class Telegram {
     async elaborate(body) {
         //return await this.troll(body.message);
         if (body.message.text.charAt(0) === '/') {
-            return await this.elaborateCommand(body.message.substring(1));
+            return await this.elaborateCommand(body.message);
         } else if (this.waitingForEnter.includes(body.message.from.id)) {
             return await this.tryJoinTheRoom(body.message);
         } else {
@@ -44,7 +44,7 @@ class Telegram {
     }
 
     async elaborateCommand(fullMessage) {
-        const message = fullMessage.text;
+        const message = fullMessage.text.substring(1);
         if (message === 'new') {
             await this.createNewGame(fullMessage);
         } else if (['2', '3', '4', '5'].includes(message)) {
@@ -52,7 +52,7 @@ class Telegram {
         } else if (message === 'join') {
             await this.askForARoom(fullMessage.from.id);
         } else if (message === 'exit') {
-            await this.exit(message.from.id);
+            await this.exit(fullMessage.from.id);
         } else if (message === 'a') {
             // play first card (prompt action)
         } else if (message === 'b') {
@@ -87,7 +87,7 @@ class Telegram {
                 "giocatori partecipano, crea una partita con /new");
         }
         this.games[this.players[user]] = this.manager.createNewGame(
-            parseInt(message))
+            parseInt(message.text.substring(1)));
         return await this.sendMessage(user, "Invita gli altri giocatori con " +
             "l'identificativo della partita: " + this.players[user]);
     }
