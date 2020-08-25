@@ -21,12 +21,15 @@ class Telegram {
     }
 
     async sendMessage(to, text) {
-        const r = await this.tg('/sendMessage', {
+        try {
+        return await this.tg('/sendMessage', {
             chat_id: to,
             text,
             parse_mode: 'MarkdownV2'
-        })
-        console.log(r);
+        }) } catch (e) {
+            console.error(e);
+            throw e;
+        }
     }
 
     // -------------------------------------------------------------------------
