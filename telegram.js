@@ -8,7 +8,7 @@ class Telegram {
     constructor() {
         this.games = {}; // gameId: gameObj
         this.players = {}; // userId: gameId
-        this.waitingForEnter = set();
+        this.waitingForEnter = Set();
         this.manager = new GameManager();
     }
 
