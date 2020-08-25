@@ -37,7 +37,6 @@ class Telegram {
         if (body.message.text.charAt(0) === '/') {
             return await this.elaborateCommand(body.message);
         } else if (this.waitingForEnter.includes(body.message.from.id)) {
-            console.log("madonna");
             return await this.tryJoinTheRoom(body.message);
         } else {
             return await this.sendMessageToGroup(body.message);
@@ -106,10 +105,8 @@ class Telegram {
     }
 
     async tryJoinTheRoom(message) {
-        console.log("qui");
         const user = message.from.id;
         const game = this.games[message.text];
-        console.log("db");
         if (game) {
             const index = this.waitingForEnter.indexOf(user);
             if (index > -1) {
@@ -128,11 +125,9 @@ class Telegram {
                 await this.startGame(message.text);
             }
         } else {
-            console.log("dio");
             await this.sendMessage(user, "Mi dispiace, questa " +
                 "partita non esiste. Riprova ad incollare l'identificativo " +
-                "o esci usando /exit");
-            console.log("cannone");
+                "o esci usando exit");
         }
     }
 
