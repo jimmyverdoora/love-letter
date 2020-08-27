@@ -165,7 +165,7 @@ class Telegram {
         this.waitingForEnter.delete(user);
         const gameId = this.players[user];
         if (gameId) {
-            const index = -1;
+            let index = -1;
             let count = 0;
             for (const u of this.games[gameId].players) {
                 if (u.id === user) {
