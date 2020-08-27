@@ -86,7 +86,7 @@ class Telegram {
             return await this.negateThisBecauseAlreadyInGame(user);
         } else if (Object.keys(this.games).length > GAME_LIMIT) {
             return await this.sendMessage(user, "Siamo pieni\\! Purtroppo non " +
-                "si possono creare più di " + GAME_LIMIT + " partite :(");
+                "si possono creare più di " + GAME_LIMIT + " partite");
         }
         const id = this.manager.createGameId();
         this.players[user] = id;
@@ -175,7 +175,7 @@ class Telegram {
             }
         }
         delete this.players[user];
-        return await this.sendMessage(user, "Bye\\! Torna a giocare presto :)");
+        return await this.sendMessage(user, "Bye\\! Torna a giocare presto");
     }
 
     async sendMessageToGroup(message) {
