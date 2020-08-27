@@ -136,7 +136,7 @@ class Telegram {
                 "aperte\\! Creane una tu con il comando /new");
         }
         return await this.sendMessage(user, "Scegli in che partita entrare",
-            this.buildKeyboard(buttons));
+            this.buildKeyboard(...buttons));
     }
 
     async tryJoinTheRoom(id, from) {
