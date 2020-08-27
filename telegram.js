@@ -94,7 +94,7 @@ class Telegram {
         ['2', '3', '4', '5'].forEach(n => buttons.push(
             this.buildButton(n, 'nPlayers:' + n)))
         await this.sendMessage(user, "Per quanti giocatori è questa partita?",
-            this.buildKeyboard(...buttons));
+            this.buildKeyboard(buttons));
     }
 
     async initGame(players, user) {
@@ -136,7 +136,7 @@ class Telegram {
                 "aperte\\! Creane una tu con il comando /new");
         }
         return await this.sendMessage(user, "Scegli in che partita entrare",
-            this.buildKeyboard(...buttons));
+            this.buildKeyboard(buttons));
     }
 
     async tryJoinTheRoom(id, from) {
