@@ -1,6 +1,8 @@
 const axios = require('axios');
 const GameManager = require('./game');
+const HELP_TEXT = require('./help');
 
+const GAME_LIMIT = 16;
 const TELEGRAM_URL = 'https://api.telegram.org/bot' + process.env.BOT_SECRET;
 
 class Telegram {
@@ -42,11 +44,10 @@ class Telegram {
     // -------------------------------------------------------------------------
 
     async elaborate(body) {
-        return await this.troll(body.message);
-        if (body.message.text.charAt(0) === '/') {
+        if (body.callback_query) {
+            return await this.elaborateQuery(body.callback_query);
+        } else if (body.message.text.charAt(0) === '/') {
             return await this.elaborateCommand(body.message);
-        } else if (this.waitingForEnter.has(body.message.from.id)) {
-            return await this.tryJoinTheRoom(body.message);
         } else {
             return await this.sendMessageToGroup(body.message);
         }
@@ -61,36 +62,56 @@ class Telegram {
         } else if (message === 'exit') {
             await this.exit(fullMessage.from.id);
         } else if (message === 'help') {
-            // show help
+            await this.sendMessage(fullMessage.from.id, HELP_TEXT);
         } else {
-            // wrong command
+            await this.sendMessage(fullMessage.from.id,
+                "Questo comando non esiste!")
         }
-        return; // TODO
+        return;
+    }
+
+    async elaborateQuery(query) {
+        const command = query.data.split(':')[0];
+        const value = query.data.split(':')[1];
+        if (command === 'nPlayers') {
+            return await this.initGame(parseInt(value), query.from);
+        } else if (command === 'join') {
+            return await this.tryJoinTheRoom(value, query.from);
+        }
     }
 
     async createNewGame(message) {
         const user = message.from.id;
         if (this.players[user]) {
             return await this.negateThisBecauseAlreadyInGame(user);
+        } else if (Object.keys(this.games).length > GAME_LIMIT) {
+            return await this.sendMessage(user, "Siamo pieni! Purtroppo non " +
+                "si possono creare più di " + GAME_LIMIT + " partite :(");
         }
         const id = this.manager.createGameId();
         this.players[user] = id;
-        await this.sendMessage(user, "Per quanti giocatori è questa partita?" +
-            "\n/2\n/3\n/4\n/5");
+        const buttons = [];
+        ['2', '3', '4', '5'].forEach(n => buttons.add(
+            this.buildButton(n, 'nPlayers:' + n)))
+        await this.sendMessage(user, "Per quanti giocatori è questa partita?",
+            this.buildKeyboard(buttons));
     }
 
-    async initGame(message) {
-        const user = message.from.id;
-        if (this.games[this.players[user]]) {
-            return await this.negateThisBecauseAlreadyInGame(user);
-        } else if (!this.players[user]) {
-            return await this.sendMessage(user, "Prima di dichiarare quanti " +
+    async initGame(players, user) {
+        if (this.games[this.players[user.id]]) {
+            return await this.negateThisBecauseAlreadyInGame(user.id);
+        } else if (!this.players[user.id]) {
+            return await this.sendMessage(user.id, "Prima di dichiarare quanti " +
                 "giocatori partecipano, crea una partita con /new");
         }
-        this.games[this.players[user]] = this.manager.createNewGame(
-            parseInt(message.text.substring(1)));
-        return await this.sendMessage(user, "Invita gli altri giocatori con " +
-            "l'identificativo della partita: " + this.players[user]);
+        if (players < 2 || players > 5) {
+            return await this.sendMessage(user.id, "Una partita può avere " +
+                "dai 2 ai 5 giocatori");
+        }
+        this.games[this.players[user.id]] = this.manager.createNewGame(players);
+        game.players.push(this.manager.createPlayer(user.id, user.username));
+        return await this.sendMessage(user.id, "Invita gli altri giocatori con " +
+            "l'identificativo della partita: " + this.players[user.id]);
     }
 
     async negateThisBecauseAlreadyInGame(user) {
@@ -101,31 +122,36 @@ class Telegram {
 
     async askForARoom(user) {
         this.waitingForEnter.add(user);
-        return await this.sendMessage(user, "Incollami l'identificativo della" +
-            " partita")
+        const buttons = [];
+        for (const game of this.games) {
+            if (game.state === 'open') {
+                buttons.add([this.buildButton(game.id, 'join:' + game.id)]);
+            }
+        }
+        return await this.sendMessage(user, "Scegli in che partita entrare",
+            this.buildKeyboard(buttons));
     }
 
-    async tryJoinTheRoom(message) {
-        const user = message.from.id;
-        const game = this.games[message.text];
+    async tryJoinTheRoom(id, from) {
+        const user = from.id;
+        const game = this.games[id];
         if (game) {
             this.waitingForEnter.delete(user);
-            this.players[user] = message.text;
+            this.players[user] = id;
             game.players.push(this.manager.createPlayer(
-                user, message.from.username
+                user, from.username
             ));
             await this.sendMessageToGroup({
-                from: message.from,
-                text: "Attenzione! " + message.from.username + " si è " +
+                from,
+                text: "Attenzione! " + from.username + " si è " +
                     "aggiunto alla partita"
             });
             if (game.players.length === game.nPlayers) {
-                await this.startGame(message.text);
+                await this.startGame(id);
             }
         } else {
             await this.sendMessage(user, "Mi dispiace, questa " +
-                "partita non esiste\\. Riprova ad incollare l'identificativo " +
-                "o esci usando /exit");
+                "partita non esiste\\. Puoi terminare l'operazione usando /exit");
         }
     }
 
@@ -133,23 +159,23 @@ class Telegram {
         this.waitingForEnter.delete(user);
         const gameId = this.players[user];
         if (gameId) {
-            const index2 = -1;
+            const index = -1;
             let count = 0;
             for (const u of this.games[gameId].players) {
                 if (u.id === user) {
-                    index2 = count;
+                    index = count;
                     break;
                 }
             }
-            if (index2 > -1) {
-                this.games[gameId].players.splice(index2, 1);
+            if (index > -1) {
+                this.games[gameId].players.splice(index, 1);
             }
             if (this.games[gameId].players.length === 0) {
                 delete this.games[gameId];
             }
         }
         delete this.players[user];
-        return await this.sendMessage(user, "Operazione completata");
+        return await this.sendMessage(user, "Bye! Torna a giocare presto :)");
     }
 
     async sendMessageToGroup(message) {
@@ -170,6 +196,7 @@ class Telegram {
     }
 
     buildButton(name, callbackData) {
+        callbackData.replace('-', '//-');
         return {
             text: name,
             callback_data: callbackData
@@ -180,14 +207,6 @@ class Telegram {
         return {
             inline_keyboard: [buttons]
         };
-    }
-
-    // asd
-    async troll(message) {
-        const button1 = this.buildButton("dio cannone", "cannone");
-        const button2 = this.buildButton("madonna legna", "legna")
-        const keyboard = this.buildKeyboard([button1, button2]);
-        this.sendMessage(message.from.id, "scegli una bestemmia:", keyboard);
     }
 }
 
