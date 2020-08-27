@@ -149,7 +149,7 @@ class Telegram {
                 user, from.username
             ));
             await this.sendMessageToGroup({
-                from,
+                from: '',
                 text: "Attenzione\\! " + from.username + " si è " +
                     "aggiunto alla partita"
             });
