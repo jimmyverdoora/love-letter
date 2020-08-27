@@ -184,8 +184,8 @@ class Telegram {
 
     // asd
     async troll(message) {
-        const button1 = this.buildButton("dio cannone", {dio: "cannone"});
-        const button2 = this.buildButton("madonna legna", {madonna: "legna"})
+        const button1 = this.buildButton("dio cannone", "cannone");
+        const button2 = this.buildButton("madonna legna", "legna")
         const keyboard = this.buildKeyboard([button1, button2]);
         this.sendMessage(message.from.id, "scegli una bestemmia:", keyboard);
     }
