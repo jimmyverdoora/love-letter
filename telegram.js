@@ -65,7 +65,7 @@ class Telegram {
             await this.sendMessage(fullMessage.from.id, HELP_TEXT);
         } else {
             await this.sendMessage(fullMessage.from.id,
-                "Questo comando non esiste!")
+                "Questo comando non esiste\\!")
         }
         return;
     }
@@ -85,7 +85,7 @@ class Telegram {
         if (this.players[user]) {
             return await this.negateThisBecauseAlreadyInGame(user);
         } else if (Object.keys(this.games).length > GAME_LIMIT) {
-            return await this.sendMessage(user, "Siamo pieni! Purtroppo non " +
+            return await this.sendMessage(user, "Siamo pieni\\! Purtroppo non " +
                 "si possono creare più di " + GAME_LIMIT + " partite :(");
         }
         const id = this.manager.createGameId();
@@ -143,7 +143,7 @@ class Telegram {
             ));
             await this.sendMessageToGroup({
                 from,
-                text: "Attenzione! " + from.username + " si è " +
+                text: "Attenzione\\! " + from.username + " si è " +
                     "aggiunto alla partita"
             });
             if (game.players.length === game.nPlayers) {
@@ -175,7 +175,7 @@ class Telegram {
             }
         }
         delete this.players[user];
-        return await this.sendMessage(user, "Bye! Torna a giocare presto :)");
+        return await this.sendMessage(user, "Bye\\! Torna a giocare presto :)");
     }
 
     async sendMessageToGroup(message) {
