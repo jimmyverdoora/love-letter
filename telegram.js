@@ -28,7 +28,7 @@ class Telegram {
                 parse_mode: 'MarkdownV2',
             }
             if (keyboard) {
-                payload[reply_markup] = keyboard;
+                payload['reply_markup'] = keyboard;
             }
             return await this.tg('/sendMessage', payload)
         } catch (e) {
