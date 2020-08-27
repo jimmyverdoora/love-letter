@@ -91,7 +91,7 @@ class Telegram {
         const id = this.manager.createGameId();
         this.players[user] = id;
         const buttons = [];
-        ['2', '3', '4', '5'].forEach(n => buttons.add(
+        ['2', '3', '4', '5'].forEach(n => buttons.push(
             this.buildButton(n, 'nPlayers:' + n)))
         await this.sendMessage(user, "Per quanti giocatori è questa partita?",
             this.buildKeyboard(buttons));
@@ -125,7 +125,7 @@ class Telegram {
         const buttons = [];
         for (const game of this.games) {
             if (game.state === 'open') {
-                buttons.add([this.buildButton(game.id, 'join:' + game.id)]);
+                buttons.push([this.buildButton(game.id, 'join:' + game.id)]);
             }
         }
         return await this.sendMessage(user, "Scegli in che partita entrare",
