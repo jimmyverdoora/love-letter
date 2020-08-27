@@ -123,7 +123,7 @@ class Telegram {
     async askForARoom(user) {
         this.waitingForEnter.add(user);
         const buttons = [];
-        for (const game of this.games) {
+        for (const game of Object.values(this.games)) {
             if (game.state === 'open') {
                 buttons.push([this.buildButton(game.id, 'join:' + game.id)]);
             }
