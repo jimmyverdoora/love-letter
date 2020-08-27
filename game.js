@@ -24,7 +24,7 @@ class GameManager {
         return {
             id,
             name,
-            state, // in, out, protected
+            state: 'in', // in, out, protected
             hand: [],
             pile: [],
             points: 0
