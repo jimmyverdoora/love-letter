@@ -128,6 +128,10 @@ class Telegram {
                 buttons.push([this.buildButton(game.id, 'join:' + game.id)]);
             }
         }
+        if (buttons.length === 0) {
+            return await this.sendMessage(user, "Non ci sono partite " +
+                " aperte\\! Creane una tu con il comando /new");
+        }
         return await this.sendMessage(user, "Scegli in che partita entrare",
             this.buildKeyboard(buttons));
     }
