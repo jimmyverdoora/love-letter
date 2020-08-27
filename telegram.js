@@ -109,7 +109,8 @@ class Telegram {
                 "dai 2 ai 5 giocatori");
         }
         this.games[this.players[user.id]] = this.manager.createNewGame(players);
-        game.players.push(this.manager.createPlayer(user.id, user.username));
+        this.games[this.players[user.id]].players.push(
+            this.manager.createPlayer(user.id, user.username));
         return await this.sendMessage(user.id, "Invita gli altri giocatori con " +
             "l'identificativo della partita: " + this.players[user.id]);
     }
@@ -130,7 +131,7 @@ class Telegram {
         }
         if (buttons.length === 0) {
             return await this.sendMessage(user, "Non ci sono partite " +
-                " aperte\\! Creane una tu con il comando /new");
+                "aperte\\! Creane una tu con il comando /new");
         }
         return await this.sendMessage(user, "Scegli in che partita entrare",
             this.buildKeyboard(buttons));
