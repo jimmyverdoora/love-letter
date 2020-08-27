@@ -20,13 +20,18 @@ class Telegram {
         return await axios.post(TELEGRAM_URL + path, payload);
     }
 
-    async sendMessage(to, text) {
+    async sendMessage(to, text, keyboard) {
         try {
-        return await this.tg('/sendMessage', {
-            chat_id: to,
-            text,
-            parse_mode: 'MarkdownV2'
-        }) } catch (e) {
+            let payload = {
+                chat_id: to,
+                text,
+                parse_mode: 'MarkdownV2',
+            }
+            if (keyboard) {
+                payload[reply_markup] = keyboard;
+            }
+            return await this.tg('/sendMessage', payload)
+        } catch (e) {
             console.error(e);
             throw e;
         }
@@ -37,7 +42,7 @@ class Telegram {
     // -------------------------------------------------------------------------
 
     async elaborate(body) {
-        //return await this.troll(body.message);
+        return await this.troll(body.message);
         if (body.message.text.charAt(0) === '/') {
             return await this.elaborateCommand(body.message);
         } else if (this.waitingForEnter.has(body.message.from.id)) {
@@ -51,20 +56,12 @@ class Telegram {
         const message = fullMessage.text.substring(1);
         if (message === 'new') {
             await this.createNewGame(fullMessage);
-        } else if (['2', '3', '4', '5'].includes(message)) {
-            await this.initGame(fullMessage);
         } else if (message === 'join') {
             await this.askForARoom(fullMessage.from.id);
         } else if (message === 'exit') {
             await this.exit(fullMessage.from.id);
-        } else if (message === 'a') {
-            // play first card (prompt action)
-        } else if (message === 'b') {
-            // play second card (prompt action)
-        } else if (message === 'h' || message === 'help') {
+        } else if (message === 'help') {
             // show help
-        } else if (message.charAt(0) === '-') {
-            // it is designating a user
         } else {
             // wrong command
         }
@@ -98,8 +95,8 @@ class Telegram {
 
     async negateThisBecauseAlreadyInGame(user) {
         return await this.sendMessage(user, "Non puoi creare una nuova " +
-            "partita perché stai gia partecipando alla partita " +
-            this.players[user] + "\\. Se vuoi uscire usa il comando /exit");
+            "partita perché stai gia partecipando ad una partita\\. " +
+            "Se vuoi uscire usa il comando /exit");
     }
 
     async askForARoom(user) {
@@ -172,20 +169,25 @@ class Telegram {
         return this.games[this.players[message.from.id]];
     }
 
+    buildButton(name, callbackData) {
+        return {
+            text: name,
+            callback_data: callbackData
+        };
+    }
+
+    buildKeyboard(buttons) {
+        return {
+            inline_keyboard: [buttons]
+        };
+    }
+
     // asd
     async troll(message) {
-        const a = Math.random();
-        if (a > 0.8) {
-            return await this.sendMessage(message.from.id, "VI SCUOIO DIO MERDA");
-        } else if (a > 0.6) {
-            return await this.sendMessage(message.from.id, "E' UNA MACCHINA DA GUERRA QUESTO COCCODRILLO");
-        } else if (a > 0.4) {
-            return await this.sendMessage(message.from.id, "FOOL OF A TUC");
-        } else if (a > 0.2) {
-            return await this.sendMessage(message.from.id, message.text + " sto cazzo");
-        } else {
-            return await this.sendMessage(message.from.id, message.text + " sarai tu dio tricheco");
-        }
+        const button1 = this.buildButton("dio cannone", {dio: "cannone"});
+        const button2 = this.buildButton("madonna legna", {madonna: "legna"})
+        const keyboard = this.buildKeyboard([button1, button2]);
+        this.sendMessage(message.from.id, "scegli una bestemmia:", keyboard);
     }
 }
 
