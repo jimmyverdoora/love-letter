@@ -77,6 +77,8 @@ class Telegram {
             return await this.initGame(parseInt(value), query.from);
         } else if (command === 'join') {
             return await this.tryJoinTheRoom(value, query.from);
+        } else if (command === 'play') {
+            return await this.handleCardPlayed(value, query.from);
         }
     }
 
@@ -114,7 +116,7 @@ class Telegram {
             this.manager.createPlayer(user.id, user.username));
         return await this.sendMessage(user.id, "Invita gli altri giocatori con " +
             "l'identificativo della partita: " + this.players[user.id]
-            .split('-').join('\\-'));
+                .split('-').join('\\-'));
     }
 
     async negateThisBecauseAlreadyInGame(user) {
@@ -149,7 +151,6 @@ class Telegram {
                 user, from.username
             ));
             await this.sendMessageToGroup({
-                from: '',
                 text: "Attenzione\\! " + from.username + " si è " +
                     "aggiunto alla partita"
             });
@@ -182,11 +183,118 @@ class Telegram {
             }
         }
         delete this.players[user];
-        return await this.sendMessage(user, "Bye\\! Torna a giocare presto");
+        await this.sendMessage(user, "Bye\\! Torna a giocare presto");
+        const actives = [];
+        for (let i = 0; i < game.players.length; i++) {
+            if (game.players[i].state !== 'out') {
+                actives.push(i);
+            }
+        }
+        if (actives.length === 0) {
+            await this.sendMessageToGroup({ text: "Game over\\!" });
+            return this.endGame();
+        } else if (actives.length === 1) {
+            await this.sendMessageToGroup({ text: "Gameover\\! Ha vinto " +
+                game.players[actives[0]].name })
+            return this.endGame();
+        }
+    }
+
+    async startGame(gameId) {
+        this.games[gameId] = this.manager.startGame(this.games[gameId]);
+        await this.sendMessageToGroup(
+            { text: "Che il gioco abbia inizio\\!" });
+        const player = this.manager.getActivePlayer(this.games[gameId]);
+        for (const p of this.games[gameId].players) {
+            await this.sendMessage(p.id, "Hai pescato " + this.style(p.hand[0]));
+        }
+        await this.sendMessageToGroup({ text: "Tocca a " + player.name });
+        return await this.askActivePlayerWhatToPlay(player);
+    }
+
+    async askActivePlayerWhatToPlay(player) {
+        const buttons = [];
+        player.hand.forEach(card => buttons.push(this.buildButton(
+            card.name, 'play:' + card.id
+        )));
+        const keyboard = this.buildKeyboard(buttons);
+        return await this.sendMessage(player.id, "Hai pescato " +
+            this.style(p.hand[1]) + "\\. Cosa giochi?", keyboard);
+    }
+
+    async handleCardPlayed(cardId, user) {
+        const game = this.games[this.players[user.id]];
+        if (!this.manager.playerCanPlay(user, cardId, game)) {
+            return await this.sendMessage(user.id, "Non puoi giocare " + 
+                "questa carta in questo momento, non trollare");
+        }
+        if (cardId.charAt(0) === '1') {
+            return await this.handleGuard(game.id);
+        } else if (cardId.charAt(0) === '2') {
+            return await this.handlePriest(game.id);
+        } else if (cardId.charAt(0) === '3') {
+            return await this.handleBaron(game.id);
+        } else if (cardId.charAt(0) === '4') {
+            return await this.handleAncel(game.id);
+        } else if (cardId.charAt(0) === '5') {
+            return await this.handlePrince(game.id);
+        } else if (cardId.charAt(0) === '6') {
+            return await this.handleKing(game.id);
+        } else if (cardId.charAt(0) === '7') {
+            return await this.handleContess(game.id);
+        } else if (cardId.charAt(0) === '8') {
+            return await this.handlePrincess(game.id);
+        }
+    }
+
+    async handlePostPlayEvents(gameId) {
+        let game = this.games[gameId];
+        const actives = [];
+        for (let i = 0; i < game.players.length; i++) {
+            if (game.players[i].state !== 'out') {
+                actives.push(i);
+            }
+        }
+        if (actives.length === 0) {
+            await this.sendMessageToGroup({ text: "Game over\\!" });
+            return this.endGame();
+        } else if (actives.length === 1) {
+            await this.sendMessageToGroup({ text: "Gameover\\! Ha vinto " +
+                game.players[actives[0]].name })
+            return this.endGame();
+        }
+        if (game.deck.length === 0) {
+            await this.showOff(game);
+            return this.endGame();
+        }
+        game = this.manager.progress(game);
+        this.games[gameId] = game;
+        return await this.askActivePlayerWhatToPlay(
+            game.players[game.activePlayer]);
+    
+    }
+
+    async showOff(game) {
+        let best = {player: null, card: 0};
+        for (const player of game.players) {
+            if (player.state !== 'out' && player.hand[0].number > best.card) {
+                best = {player, card: player.hand[0].number}
+            } else if (player.state !== 'out' && player.hand[0].number === best.card) {
+                if (player.pile.reduce((a, b) => a+b) > best.player.pile.reduce((a, b) => a+b)) {
+                    best = {player, card: player.hand[0].number}
+                }
+            }
+        }
+        return await this.sendMessageToGroup({ text: "Gameover\\! Ha vinto " +
+            best.player.name + " con " + this.style(best.player.hand[0])});
     }
 
     async sendMessageToGroup(message) {
-        const text = '*' + message.from.username + ":*\n" + message.text;
+        let text = '';
+        if (message.from) {
+            text = "*" + message.from.username + ":*\n";
+        }
+        text = text + message.text;
         const game = this.getGame(message);
         if (!game) {
             return;
@@ -214,6 +322,18 @@ class Telegram {
         return {
             inline_keyboard: [buttons]
         };
+    }
+
+    style(card) {
+        if (card.number > 6) {
+            return "la " + card.name;
+        } else if (card.number === 6) {
+            return "il Re";
+        } else if (card.number === 1 || card.number === 4) {
+            return "una " + card.name;
+        } else {
+            return "un " + card.name;
+        }
     }
 }
 
