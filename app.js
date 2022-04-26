@@ -14,9 +14,10 @@ app.use(parser.json());
 app.use(cors());
 
 app.post(WEBHOOK_URL, async (req, res) => {
-    await telegram.elaborate(req.body);
-    console.log(req.body);
-    res.status(200).send();
+  console.log('dio')
+  await telegram.elaborate(req.body);
+  console.log('cane')
+  res.status(200).send();
 });
 
 app.listen(process.env.PORT, () => {
