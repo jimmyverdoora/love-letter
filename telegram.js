@@ -198,11 +198,11 @@ class Telegram {
         }
         if (actives.length === 0) {
             await this.sendMessageToGroup({ text: "Game over\\!", gameId });
-            return this.endGame();
+            return this.endGame(gameId);
         } else if (actives.length === 1) {
-            await this.sendMessageToGroup({ gameId, text: "Gameover\\! Ha vinto " +
+            await this.sendMessageToGroup({ gameId, text: "Game over\\! Ha vinto " +
             this.games[gameId].players[actives[0]].name })
-            return this.endGame();
+            return this.endGame(gameId);
         }
     }
 
@@ -261,18 +261,17 @@ class Telegram {
                 actives.push(i);
             }
         }
-        console.log(game.players);
         if (actives.length === 0) {
             await this.sendMessageToGroup({ gameId, text: "Game over\\!" });
-            return this.endGame();
+            return this.endGame(gameId);
         } else if (actives.length === 1) {
-            await this.sendMessageToGroup({ gameId, text: "Gameover\\! Ha vinto " +
+            await this.sendMessageToGroup({ gameId, text: "Game over\\! Ha vinto " +
                 game.players[actives[0]].name })
-            return this.endGame();
+            return this.endGame(gameId);
         }
         if (game.deck.length === 0) {
             await this.showOff(game);
-            return this.endGame();
+            return this.endGame(gameId);
         }
         game = this.manager.progress(game);
         this.games[gameId] = game;
@@ -311,6 +310,10 @@ class Telegram {
                 await this.sendMessage(player.id, text);
             }
         }
+    }
+
+    endGame(gameId) {
+        console.log(this.games[gameId]);
     }
 
     getGame(message) {
