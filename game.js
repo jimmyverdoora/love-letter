@@ -37,7 +37,7 @@ class GameManager {
         const discardedCard = this.draw(game);
         game.discardedCard = discardedCard;
         game = this.givePlayersACard(game);
-        game.players[activePlayer].hand.push(this.draw(game));
+        game.players[game.activePlayer].hand.push(this.draw(game));
         return game;
     }
 
