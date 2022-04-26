@@ -185,8 +185,8 @@ class Telegram {
         delete this.players[user];
         await this.sendMessage(user, "Bye\\! Torna a giocare presto");
         const actives = [];
-        for (let i = 0; i < game.players.length; i++) {
-            if (game.players[i].state !== 'out') {
+        for (let i = 0; i < this.games[gameId].players.length; i++) {
+            if (this.games[gameId].players[i].state !== 'out') {
                 actives.push(i);
             }
         }
@@ -195,7 +195,7 @@ class Telegram {
             return this.endGame();
         } else if (actives.length === 1) {
             await this.sendMessageToGroup({ text: "Gameover\\! Ha vinto " +
-                game.players[actives[0]].name })
+            this.games[gameId].players[actives[0]].name })
             return this.endGame();
         }
     }
