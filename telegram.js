@@ -168,11 +168,7 @@ class Telegram {
 
     async exit(user) {
         this.waitingForEnter.delete(user);
-        const gameId = this.players[user];
-        console.log('---')
-        console.log(this.games[gameId])
-        console.log(user)
-        console.log('---')
+        const gameId = this.players[user]; 
         if (gameId && this.games[gameId]) {
             let index = -1;
             let count = 0;
@@ -189,6 +185,10 @@ class Telegram {
                 delete this.games[gameId];
             }
         }
+        console.log('---')
+        console.log(this.games[gameId])
+        console.log(user)
+        console.log('---')
         delete this.players[user];
         await this.sendMessage(user, "Bye\\! Torna a giocare presto");
         const actives = [];
