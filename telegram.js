@@ -81,6 +81,10 @@ class Telegram {
             return await this.tryJoinTheRoom(value, query.from);
         } else if (command === 'play') {
             return await this.handleCardPlayed(value, query.from);
+        } else if (command === 'guard1') {
+            return await this.handleGuard1(value, query.from);
+        } else if (command === 'guard2') {
+            return await this.handleGuard2(value, query.from);
         }
     }
 
@@ -236,7 +240,7 @@ class Telegram {
                 "questa carta in questo momento, non trollare");
         }
         if (cardId.charAt(0) === '1') {
-            return await this.handleGuard(game.id);
+            return await this.handleGuard(game.id, user.id);
         } else if (cardId.charAt(0) === '2') {
             return await this.handlePriest(game.id);
         } else if (cardId.charAt(0) === '3') {
@@ -313,6 +317,43 @@ class Telegram {
         }
     }
 
+    // ----------------- CARDS
+
+    async handleGuard(userId) {
+        const buttons = [];
+        buttons.push([this.buildButton("Prete", 'guard1:2'), this.buildButton("Barone", 'guard1:3')]);
+        buttons.push([this.buildButton("Ancella", 'guard1:4'), this.buildButton("Principe", 'guard1:5')]);
+        buttons.push([this.buildButton("Re", 'guard1:6'), this.buildButton("Contessa", 'guard1:7')]);
+        buttons.push([this.buildButton("Principessa", 'guard1:8'), this.buildButton("PASSA", 'guard2:PASS')]);
+        return await this.sendMessage(userId, "Scegli che carta chiedere",
+            this.buildKeyboard(...buttons));
+    }
+
+    async handleGuard1(value, userId) {
+        const game = this.games[this.players[userId]];
+        const buttons = [];
+        for (const u of game.players) {
+            if (u.status === 'in') {
+                buttons.push([this.buildButton(u.name, `guard2:${value}-${u.id}`)]);
+            }
+        }
+        buttons.push([this.buildButton("PASSA", 'guard2:PASS')]);
+        return await this.sendMessage(userId, "Scegli il giocatore",
+            this.buildKeyboard(...buttons));
+    }
+
+    async handleGuard2(value, userId) {
+        const game = this.games[this.players[userId]];
+        this.manager.play(game, 1);
+        if (value !== 'PASS') {
+            const splitted = value.split('-');
+            // todo
+        }
+        return await this.handlePostPlayEvents(game.id);
+    }
+
+    // -----------------------
+
     endGame(gameId) {
         if (this.games[gameId]) {
             for (const p of this.games[gameId].players) {
@@ -320,8 +361,6 @@ class Telegram {
             }
             delete this.games[gameId];
         }
-        console.log(this.games);
-        console.log(this.players);
     }
 
     getGame(message) {

@@ -48,10 +48,10 @@ class GameManager {
         return game;
     }
 
-    playerCanPlay(player, card, game) {
+    playerCanPlay(player, cardId, game) {
         if (game.players[game.activePlayer].id === player.id);
-            for (const c of game.players[game.activePlayer]) {
-                if (c.id === card.id) {
+            for (const c of game.players[game.activePlayer].hand) {
+                if (c.id === cardId) {
                     return true;
                 }
             }
@@ -84,6 +84,21 @@ class GameManager {
         game.players[activePlayer].hand.push(this.draw(game));
         return game;
 
+    }
+
+    play(game, cardNumber) {
+        let index = -1;
+        const player = this.getActivePlayer(game);
+        for (let i = 0; i < 2; i++) {
+            if (player.hand[i].number === cardNumber) {
+                index = i;
+            }
+        }
+        if (index < 0) {
+            throw new Error(`Cannot find ${cardNumber} in this hand: ${player.hand}`);
+        }
+        const card = this.games[gameId].players[game.activePlayer].hand.splice(index, 1);
+        this.games[gameId].players[game.activePlayer].pile.push(card);
     }
 
     shuffle(deck) {
