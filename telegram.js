@@ -169,6 +169,10 @@ class Telegram {
     async exit(user) {
         this.waitingForEnter.delete(user);
         const gameId = this.players[user];
+        console.log('---')
+        console.log(this.games[gameId])
+        console.log(user)
+        console.log('---')
         if (gameId && this.games[gameId]) {
             let index = -1;
             let count = 0;
