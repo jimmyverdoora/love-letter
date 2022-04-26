@@ -306,7 +306,7 @@ class Telegram {
             return;
         }
         for (let player of game.players) {
-            if (player.id !== message.from.id) {
+            if (!message.from || player.id !== message.from.id) {
                 await this.sendMessage(player.id, text);
             }
         }
