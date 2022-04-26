@@ -153,6 +153,7 @@ class Telegram {
                 user, from.username
             ));
             await this.sendMessageToGroup({
+                gameId: id,
                 text: "Attenzione\\! " + from.username + " si è " +
                     "aggiunto alla partita"
             });
@@ -196,10 +197,10 @@ class Telegram {
             }
         }
         if (actives.length === 0) {
-            await this.sendMessageToGroup({ text: "Game over\\!" });
+            await this.sendMessageToGroup({ text: "Game over\\!", gameId });
             return this.endGame();
         } else if (actives.length === 1) {
-            await this.sendMessageToGroup({ text: "Gameover\\! Ha vinto " +
+            await this.sendMessageToGroup({ gameId, text: "Gameover\\! Ha vinto " +
             this.games[gameId].players[actives[0]].name })
             return this.endGame();
         }
@@ -208,12 +209,12 @@ class Telegram {
     async startGame(gameId) {
         this.games[gameId] = this.manager.startGame(this.games[gameId]);
         await this.sendMessageToGroup(
-            { text: "Che il gioco abbia inizio\\!" });
+            { gameId, text: "Che il gioco abbia inizio\\!" });
         const player = this.manager.getActivePlayer(this.games[gameId]);
         for (const p of this.games[gameId].players) {
             await this.sendMessage(p.id, "Hai pescato " + this.style(p.hand[0]));
         }
-        await this.sendMessageToGroup({ text: "Tocca a " + player.name });
+        await this.sendMessageToGroup({ gameId, text: "Tocca a " + player.name });
         return await this.askActivePlayerWhatToPlay(player);
     }
 
@@ -261,10 +262,10 @@ class Telegram {
             }
         }
         if (actives.length === 0) {
-            await this.sendMessageToGroup({ text: "Game over\\!" });
+            await this.sendMessageToGroup({ gameId, text: "Game over\\!" });
             return this.endGame();
         } else if (actives.length === 1) {
-            await this.sendMessageToGroup({ text: "Gameover\\! Ha vinto " +
+            await this.sendMessageToGroup({ gameId, text: "Gameover\\! Ha vinto " +
                 game.players[actives[0]].name })
             return this.endGame();
         }
@@ -290,7 +291,7 @@ class Telegram {
                 }
             }
         }
-        return await this.sendMessageToGroup({ text: "Gameover\\! Ha vinto " +
+        return await this.sendMessageToGroup({ gameId: game.id, text: "Gameover\\! Ha vinto " +
             best.player.name + " con " + this.style(best.player.hand[0])});
     }
 
@@ -312,6 +313,9 @@ class Telegram {
     }
 
     getGame(message) {
+        if (message.gameId) {
+            return this.games[message.gameId];
+        }
         return this.games[this.players[message.from.id]];
     }
 
