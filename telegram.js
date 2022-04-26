@@ -44,9 +44,10 @@ class Telegram {
     // -------------------------------------------------------------------------
 
     async elaborate(body) {
-        console.log(body);
         if (body.callback_query) {
             return await this.elaborateQuery(body.callback_query);
+        } else if (!body.message) {
+            return;
         } else if (body.message.text.charAt(0) === '/') {
             return await this.elaborateCommand(body.message);
         } else {
