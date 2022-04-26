@@ -12,7 +12,7 @@ class GameManager {
             state: 'open',
             players: [],
             nPlayers,
-            discardedCard: null;
+            discardedCard: null
         }
     }
 
