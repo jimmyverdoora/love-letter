@@ -225,7 +225,7 @@ class Telegram {
         )));
         const keyboard = this.buildKeyboard(buttons);
         return await this.sendMessage(player.id, "Hai pescato " +
-            this.style(p.hand[1]) + "\\. Cosa giochi?", keyboard);
+            this.style(player.hand[1]) + "\\. Cosa giochi?", keyboard);
     }
 
     async handleCardPlayed(cardId, user) {
