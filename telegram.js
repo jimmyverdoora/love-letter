@@ -261,6 +261,7 @@ class Telegram {
                 actives.push(i);
             }
         }
+        console.log(game.players);
         if (actives.length === 0) {
             await this.sendMessageToGroup({ gameId, text: "Game over\\!" });
             return this.endGame();
