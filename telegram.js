@@ -315,7 +315,7 @@ class Telegram {
 
     endGame(gameId) {
         if (this.games[gameId]) {
-            for (const p of this.games[gameId]) {
+            for (const p of this.games[gameId].players) {
                 delete this.players[p.id];
             }
             delete this.games[gameId];
