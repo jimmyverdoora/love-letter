@@ -177,6 +177,7 @@ class Telegram {
                     index = count;
                     break;
                 }
+                count += 1;
             }
             if (index > -1) {
                 this.games[gameId].players.splice(index, 1);
@@ -184,11 +185,7 @@ class Telegram {
             if (this.games[gameId].players.length === 0) {
                 delete this.games[gameId];
             }
-        }
-        console.log('---')
-        console.log(this.games[gameId])
-        console.log(user)
-        console.log('---')
+        } 
         delete this.players[user];
         await this.sendMessage(user, "Bye\\! Torna a giocare presto");
         const actives = [];
@@ -317,7 +314,14 @@ class Telegram {
     }
 
     endGame(gameId) {
-        console.log(this.games[gameId]);
+        if (this.games[gameId]) {
+            for (const p of this.games[gameId]) {
+                delete this.players[p.id];
+            }
+            delete this.games[gameId];
+        }
+        console.log(this.games);
+        console.log(this.players);
     }
 
     getGame(message) {
