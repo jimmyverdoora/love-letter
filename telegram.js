@@ -44,6 +44,7 @@ class Telegram {
     // -------------------------------------------------------------------------
 
     async elaborate(body) {
+        console.log(body.message);
         if (body.callback_query) {
             return await this.elaborateQuery(body.callback_query);
         } else if (body.message.text.charAt(0) === '/') {
