@@ -185,6 +185,9 @@ class Telegram {
         delete this.players[user];
         await this.sendMessage(user, "Bye\\! Torna a giocare presto");
         const actives = [];
+        if (!gameId) {
+            return;
+        }
         for (let i = 0; i < this.games[gameId].players.length; i++) {
             if (this.games[gameId].players[i].state !== 'out') {
                 actives.push(i);
