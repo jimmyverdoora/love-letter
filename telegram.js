@@ -515,11 +515,11 @@ class Telegram {
             game = this.manager.discard(game, playerIndex);
             const discarded = game.players[playerIndex].pile.slice(-1)[0];
             text = `Il Principe di ${user.username} elimina ${this.style(discarded)} di ${playerName}`;
-            if (game.deck.length === 0) {
-                text += `\n${playerName} non puo' pescare perche' il mazzo e' finito\\. Get rekt\\!`;
-                game.players[playerIndex].state = 'out';
-            } else if (discarded.number == 8) {
+            if (discarded.number == 8) {
                 text += `\n${playerName} ha scartato la Principessa\\. Get rekt\\!`;
+                game.players[playerIndex].state = 'out';
+            } else if (game.deck.length === 0) {
+                text += `\n${playerName} non puo' pescare perche' il mazzo e' finito\\. Get rekt\\!`;
                 game.players[playerIndex].state = 'out';
             } else {
                 const cardDrown = this.manager.draw(game);
@@ -546,7 +546,7 @@ class Telegram {
         const index = this.manager.getPlayerIndexFromId(userId, game);
         const player = game.players[index];
         const text = `${player.name} ha scartato la Principessa\\. Get rekt\\!`;
-        game.players[playerIndex].state = 'out';
+        game.players[index].state = 'out';
         this.games[this.players[userId]] = game;
         const gameId = game.id;
         await this.sendMessageToGroup({
