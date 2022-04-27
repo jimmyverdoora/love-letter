@@ -398,7 +398,7 @@ class Telegram {
 
     async handlePriest1(target, user) {
         const game = this.games[this.players[user.id]];
-        this.games[this.players[user.id]] = this.manager.play(game, 1);
+        this.games[this.players[user.id]] = this.manager.play(game, 2);
         let text, text2;
         if (target !== 'PASS') { 
             const player = game.players[this.manager.getPlayerIndexFromId(target, game)];
