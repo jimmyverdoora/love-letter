@@ -64,6 +64,8 @@ class Telegram {
             await this.askForARoom(fullMessage.from.id);
         } else if (message === 'exit') {
             await this.exit(fullMessage.from.id);
+        } else if (message === 'status') {
+            await this.status(fullMessage.from.id);
         } else if (message === 'help') {
             await this.sendMessage(fullMessage.from.id, HELP_TEXT);
         } else {
@@ -88,6 +90,8 @@ class Telegram {
             return await this.handleGuard2(value, query.from);
         } else if (command === 'priest') {
             return await this.handlePriest1(value, query.from);
+        } else if (command === 'baron') {
+            return await this.handleBaron1(value, query.from);
         }
     }
 
@@ -173,6 +177,15 @@ class Telegram {
         }
     }
 
+    async status(user) {
+        const gameId = this.players[user];
+        if (gameId && this.games[gameId]) {
+            await this.sendMessage(user, this.manager.getStatus(this.games[gameId]));
+        } else {
+            await this.sendMessage(user, "Non stai partecipando a nessuna partita");
+        }
+    }
+
     async exit(user) {
         this.waitingForEnter.delete(user);
         const gameId = this.players[user];
@@ -249,17 +262,17 @@ class Telegram {
         } else if (cardId.charAt(0) === '2') {
             return await this.handlePriest(user.id);
         } else if (cardId.charAt(0) === '3') {
-            return await this.handleBaron(game.id);
+            return await this.handleBaron(user.id);
         } else if (cardId.charAt(0) === '4') {
-            return await this.handleAncel(game.id);
+            return await this.handleAncel(user.id);
         } else if (cardId.charAt(0) === '5') {
-            return await this.handlePrince(game.id);
+            return await this.handlePrince(user.id);
         } else if (cardId.charAt(0) === '6') {
-            return await this.handleKing(game.id);
+            return await this.handleKing(user.id);
         } else if (cardId.charAt(0) === '7') {
-            return await this.handleContess(game.id);
+            return await this.handleContess(user.id);
         } else if (cardId.charAt(0) === '8') {
-            return await this.handlePrincess(game.id);
+            return await this.handlePrincess(user.id);
         }
     }
 
@@ -414,6 +427,48 @@ class Telegram {
         if (text2) {
             await this.sendMessage(user.id, text2);
         }
+        return await this.handlePostPlayEvents(game.id);
+    }
+
+    async handleBaron(userId) {
+        const game = this.games[this.players[userId]];
+        const buttons = [];
+        for (const u of game.players) {
+            if (u.state === 'in' && u.id !== userId) {
+                buttons.push([this.buildButton(u.name, `baron:${u.id}`)]);
+            }
+        }
+        buttons.push([this.buildButton("PASSA", 'baron:PASS')]);
+        return await this.sendMessage(userId, "Scegli il giocatore",
+            this.buildKeyboard(buttons));
+    }
+
+    async handleBaron1(target, user) {
+        const game = this.games[this.players[user.id]];
+        this.games[this.players[user.id]] = this.manager.play(game, 3);
+        let text;
+        if (target !== 'PASS') {
+            user = game.players[this.manager.getPlayerIndexFromId(user.id, game)];
+            const player = game.players[this.manager.getPlayerIndexFromId(target, game)];
+            if (user.hand[0].number > player.hand[0].number) {
+                this.games[this.players[user.id]] = this.manager.eliminatePlayer(player.id, game);
+                text = `${user.name} usa un Barone contro ${player.name}\\. La carta di ${user.name} rekta ` +
+                    `${this.style(player.hand[0])} di ${player.name}\\!`;
+            } else if (user.hand[0].number < player.hand[0].number) {
+                this.games[this.players[user.id]] = this.manager.eliminatePlayer(user.id, game);
+                text = `${user.name} usa un Barone contro ${player.name}\\. La carta di ${player.name} rekta ` +
+                    `${this.style(user.hand[0])} di ${user.name}\\!`;
+            } else {
+                text = `${user.name} usa un Barone contro ${player.name}\\. La carte di ${user.name} e ` +
+                    `${player.name} sono uguali\\!`;
+            }
+        } else {
+            text = `Il Barone di ${user.username} non fa nulla`;
+        }
+        const gameId = game.id;
+        await this.sendMessageToGroup({
+            gameId, text
+        }); 
         return await this.handlePostPlayEvents(game.id);
     }
 

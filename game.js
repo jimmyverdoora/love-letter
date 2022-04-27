@@ -155,6 +155,14 @@ class GameManager {
     getActivePlayer(game) {
         return game.players[game.activePlayer];
     }
+
+    getStatus(game) {
+        let status = '*Carte rimanenti:* ' + game.deck.length + '\n';
+        for (const p of game.players) {
+            status += `*`
+        }
+        return status;
+    }
 }
 
 module.exports = GameManager;
