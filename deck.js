@@ -69,16 +69,16 @@ const generateDeck = () => [
         name: 'Ancella',
         number: 4
     },
-    // {
-    //     id: '5a',
-    //     name: 'Principe',
-    //     number: 5
-    // },
-    // {
-    //     id: '5b',
-    //     name: 'Principe',
-    //     number: 5
-    // },
+    {
+        id: '5a',
+        name: 'Principe',
+        number: 5
+    },
+    {
+        id: '5b',
+        name: 'Principe',
+        number: 5
+    },
     // {
     //     id: '6',
     //     name: 'Re',

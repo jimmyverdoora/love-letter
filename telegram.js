@@ -92,6 +92,8 @@ class Telegram {
             return await this.handlePriest1(value, query.from);
         } else if (command === 'baron') {
             return await this.handleBaron1(value, query.from);
+        } else if (command === 'prince') {
+            return await this.handlePrince1(value, query.from);
         }
     }
 
@@ -480,11 +482,58 @@ class Telegram {
         this.games[this.players[userId]] = this.manager.play(game, 4);
         const index = this.manager.getPlayerIndexFromId(userId, game);
         const player = game.players[index];
-        const text = `La Ancella di ${player.name} lo protegge fino al prossimo turno`;
+        const text = `La Ancella di ${player.name} protegge fino al prossimo turno`;
         const gameId = game.id;
         await this.sendMessageToGroup({
             gameId, text
         });
+        return await this.handlePostPlayEvents(game.id);
+    }
+
+    async handlePrince(userId) {
+        const game = this.games[this.players[userId]];
+        const buttons = [];
+        for (const u of game.players) {
+            if (u.state === 'in' && u.id !== userId) {
+                buttons.push([this.buildButton(u.name, `prince:${u.id}`)]);
+            }
+        }
+        buttons.push([this.buildButton("PASSA", 'prince:PASS')]);
+        return await this.sendMessage(userId, "Scegli il giocatore",
+            this.buildKeyboard(buttons));
+    }
+
+    async handlePrince1(target, user) {
+        let game = this.games[this.players[user.id]];
+        this.games[this.players[user.id]] = this.manager.play(game, 5);
+        let text, text2;
+        if (target !== 'PASS') {
+            const playerIndex = this.manager.getPlayerIndexFromId(target, game);
+            game = this.manager.discard(game, playerIndex);
+            const discarded = game.players[playerIndex].pile.slice(-1)[0];
+            text = `Il Principe di ${user.username} elimina ${this.style(discarded)} di ${player.name}`;
+            if (game.deck.length === 0) {
+                text += `\n${player.name} non puo' pescare perche' il mazzo e' finito\\. Get rekt\\!`;
+                game.players[playerIndex].state = 'out';
+            } else if (discarded.number == 8) {
+                text += `\n${player.name} ha scartato la Principessa\\. Get rekt\\!`;
+                game.players[playerIndex].state = 'out';
+            } else {
+                const cardDrown = this.manager.draw(game);
+                game.players[playerIndex].hand.push(cardDrown);
+                text2 = `Hai pescato ${this.style(cardDrown)}`;
+            }
+            this.games[this.players[user.id]] = game;
+        } else {
+            text = `Il Principe di ${user.username} non fa nulla`;
+        }
+        const gameId = game.id;
+        await this.sendMessageToGroup({
+            gameId, text
+        }); 
+        if (text2) {
+            await this.sendMessage(target, text2);
+        }
         return await this.handlePostPlayEvents(game.id);
     }
 
