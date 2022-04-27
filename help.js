@@ -1,1 +1,1 @@
-module.exports = 'Vai a leggerti le regole noob 🔴';
+module.exports = 'Vai a leggerti le regole noob 🤣';

@@ -159,7 +159,10 @@ class GameManager {
     getStatus(game) {
         let status = '*Carte rimanenti:* ' + game.deck.length + '\n';
         for (const p of game.players) {
-            status += `*`
+            status += `${p.state === 'in' ? '🟢' : p.state === 'out' ? '🔴' : '🔵'} *${p.name}*\n`;
+            for (const c of p.pile) {
+                status += `- ${c.name}\n`;
+            }
         }
         return status;
     }
