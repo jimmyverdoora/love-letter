@@ -86,6 +86,8 @@ class Telegram {
             return await this.handleGuard1(value, query.from);
         } else if (command === 'guard2') {
             return await this.handleGuard2(value, query.from);
+        } else if (command === 'priest') {
+            return await this.handlePriest1(value, query.from);
         }
     }
 
@@ -245,7 +247,7 @@ class Telegram {
         if (cardId.charAt(0) === '1') {
             return await this.handleGuard(user.id);
         } else if (cardId.charAt(0) === '2') {
-            return await this.handlePriest(game.id);
+            return await this.handlePriest(user.id);
         } else if (cardId.charAt(0) === '3') {
             return await this.handleBaron(game.id);
         } else if (cardId.charAt(0) === '4') {
@@ -285,8 +287,6 @@ class Telegram {
         }
         game = this.manager.progress(game);
         this.games[gameId] = game;
-        console.log(game.deck);
-        console.log(game.players);
         return await this.askActivePlayerWhatToPlay(
             game.players[game.activePlayer]);
 
@@ -366,20 +366,54 @@ class Telegram {
             const name = this.manager.getPlayerNameFromId(target, game);
             if (this.manager.checkIfHasCard(target, value, game)) {
                 this.games[this.players[user.id]] = this.manager.eliminatePlayer(target, game);
-                text = `La guardia di ${user.username} sgama ${this.styleFromNumber(value)} ` +
+                text = `La Guardia di ${user.username} sgama ${this.styleFromNumber(value)} ` +
                     `a ${name}\\! Get rekt\\!`;
             } else {
-                text = `La guardia di ${user.username} non sgama ${this.styleFromNumber(value)} ` +
+                text = `La Guardia di ${user.username} non sgama ${this.styleFromNumber(value)} ` +
                     `a ${name}`;
             }
 
         } else {
-            text = `La guardia di ${user.username} non fa nulla`;
+            text = `La Guardia di ${user.username} non fa nulla`;
         }
         const gameId = game.id;
         await this.sendMessageToGroup({
             gameId, text
         });
+        return await this.handlePostPlayEvents(game.id);
+    }
+
+    async handlePriest(userId) {
+        const game = this.games[this.players[userId]];
+        const buttons = [];
+        for (const u of game.players) {
+            if (u.state === 'in' && u.id !== userId) {
+                buttons.push([this.buildButton(u.name, `priest:${u.id}`)]);
+            }
+        }
+        buttons.push([this.buildButton("PASSA", 'priest:PASS')]);
+        return await this.sendMessage(user.id, "Scegli il giocatore",
+            this.buildKeyboard(buttons));
+    }
+
+    async handlePriest1(target, user) {
+        const game = this.games[this.players[user.id]];
+        this.games[this.players[user.id]] = this.manager.play(game, 1);
+        let text, text2;
+        if (value !== 'PASS') { 
+            const player = game.players[this.manager.getPlayerIndexFromId(target, game)];
+            text = `Il Prete di ${user.username} guarda la mano a ${player.name}`;
+            text2 = `${player.name} ha in mano ${this.style(player.hand[0])}`;
+        } else {
+            text = `Il Prete di ${user.username} non fa nulla`;
+        }
+        const gameId = game.id;
+        await this.sendMessageToGroup({
+            gameId, text
+        });
+        if (text2) {
+            await this.sendMessage(user.id, text2);
+        }
         return await this.handlePostPlayEvents(game.id);
     }
 

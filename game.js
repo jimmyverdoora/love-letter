@@ -75,7 +75,6 @@ class GameManager {
             }
         }
         throw Error("Cannot find player " + id);
-
     }
 
     getPlayerNameFromId(id, game) {
