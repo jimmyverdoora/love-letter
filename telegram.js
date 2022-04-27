@@ -392,7 +392,7 @@ class Telegram {
             }
         }
         buttons.push([this.buildButton("PASSA", 'priest:PASS')]);
-        return await this.sendMessage(user.id, "Scegli il giocatore",
+        return await this.sendMessage(userId, "Scegli il giocatore",
             this.buildKeyboard(buttons));
     }
 
