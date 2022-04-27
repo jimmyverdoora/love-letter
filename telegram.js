@@ -416,7 +416,7 @@ class Telegram {
         const game = this.games[this.players[user.id]];
         this.games[this.players[user.id]] = this.manager.play(game, 2);
         let text, text2;
-        if (target !== 'PASS') { 
+        if (target !== 'PASS') {
             const player = game.players[this.manager.getPlayerIndexFromId(target, game)];
             text = `Il Prete di ${user.username} guarda la mano a ${player.name}`;
             text2 = `${player.name} ha in mano ${this.style(player.hand[0])}`;
@@ -471,7 +471,21 @@ class Telegram {
         const gameId = game.id;
         await this.sendMessageToGroup({
             gameId, text
-        }); 
+        });
+        return await this.handlePostPlayEvents(game.id);
+    }
+
+    async handleAncel(userId) {
+        const game = this.games[this.players[userId]];
+        this.games[this.players[userId]] = this.manager.play(game, 4);
+        let text;
+        const index = this.manager.getPlayerIndexFromId(target, game);
+        const player = game.players[index];
+        text = `La Ancella di ${player.name} lo protegge fino al prossimo turno`;
+        const gameId = game.id;
+        await this.sendMessageToGroup({
+            gameId, text
+        });
         return await this.handlePostPlayEvents(game.id);
     }
 

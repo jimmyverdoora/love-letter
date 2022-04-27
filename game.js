@@ -120,6 +120,8 @@ class GameManager {
         }
         game.activePlayer = newActive;
         game.players[game.activePlayer].hand.push(this.draw(game));
+        // reset the protected state
+        game.players[game.activePlayer].state = 'in';
         return game;
 
     }
@@ -137,6 +139,9 @@ class GameManager {
         }
         const card = game.players[game.activePlayer].hand.splice(index, 1);
         game.players[game.activePlayer].pile.push(card[0]);
+        if (cardNumber === 4) {
+            game.players[game.activePlayer].state = 'protected';
+        }
         return game;
     }
 
