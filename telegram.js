@@ -336,7 +336,7 @@ class Telegram {
         buttons[3].push(this.buildButton("Principessa", 'guard1:8'));
         buttons[3].push(this.buildButton("PASSA", 'guard2:PASS'));
         return await this.sendMessage(userId, "Scegli che carta chiedere",
-            this.buildKeyboard(buttons));
+            this.buildKeyboard(...buttons));
     }
 
     async handleGuard1(value, user) {
