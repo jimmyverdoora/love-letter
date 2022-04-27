@@ -456,13 +456,13 @@ class Telegram {
             user = game.players[this.manager.getPlayerIndexFromId(user.id, game)];
             const player = game.players[this.manager.getPlayerIndexFromId(target, game)];
             if (user.hand[0].number > player.hand[0].number) {
-                this.games[this.players[user.id]] = this.manager.eliminatePlayer(player.id, game);
                 text = `${user.name} usa un Barone contro ${player.name}\\. La carta di ${user.name} rekta ` +
                     `${this.style(player.hand[0])} di ${player.name}\\!`;
+                this.games[this.players[user.id]] = this.manager.eliminatePlayer(player.id, game);
             } else if (user.hand[0].number < player.hand[0].number) {
-                this.games[this.players[user.id]] = this.manager.eliminatePlayer(user.id, game);
                 text = `${user.name} usa un Barone contro ${player.name}\\. La carta di ${player.name} rekta ` +
                     `${this.style(user.hand[0])} di ${user.name}\\!`;
+                this.games[this.players[user.id]] = this.manager.eliminatePlayer(user.id, game);
             } else {
                 text = `${user.name} usa un Barone contro ${player.name}\\. La carte di ${user.name} e ` +
                     `${player.name} sono uguali\\!`;
