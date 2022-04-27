@@ -136,7 +136,7 @@ class GameManager {
             throw new Error(`Cannot find ${cardNumber} in this hand: ${player.hand}`);
         }
         const card = game.players[game.activePlayer].hand.splice(index, 1);
-        game.players[game.activePlayer].pile.push(card);
+        game.players[game.activePlayer].pile.push(card[0]);
         return game;
     }
 
@@ -161,7 +161,7 @@ class GameManager {
         for (const p of game.players) {
             status += `${p.state === 'in' ? '🟢' : p.state === 'out' ? '🔴' : '🔵'} *${p.name}*\n`;
             for (const c of p.pile) {
-                status += `- ${c.name}\n`;
+                status += `\\- ${c.name}\n`;
             }
         }
         return status;
