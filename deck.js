@@ -89,11 +89,11 @@ const generateDeck = () => [
     //     name: 'Contessa',
     //     number: 7
     // },
-    // {
-    //     id: '8',
-    //     name: 'Principessa',
-    //     number: 8
-    // }
+    {
+        id: '8',
+        name: 'Principessa',
+        number: 8
+    }
 ]
 
 module.exports = generateDeck;
