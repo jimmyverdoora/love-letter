@@ -94,6 +94,8 @@ class Telegram {
             return await this.handleBaron1(value, query.from);
         } else if (command === 'prince') {
             return await this.handlePrince1(value, query.from);
+        } else if (command === 'king') {
+            return await this.handleKing1(value, query.from);
         }
     }
 
@@ -537,6 +539,64 @@ class Telegram {
         if (text2) {
             await this.sendMessage(target, text2);
         }
+        return await this.handlePostPlayEvents(game.id);
+    }
+
+    async handleKing(userId) {
+        const game = this.games[this.players[userId]];
+        const buttons = [];
+        for (const u of game.players) {
+            if (u.state === 'in' && u.id !== userId) {
+                buttons.push([this.buildButton(u.name, `king:${u.id}`)]);
+            }
+        }
+        buttons.push([this.buildButton("PASSA", 'king:PASS')]);
+        return await this.sendMessage(userId, "Scegli il giocatore",
+            this.buildKeyboard(buttons));
+    }
+
+    async handleKing1(target, user) {
+        let game = this.games[this.players[user.id]];
+        game = this.manager.play(game, 6);
+        let text, textTarget, textUser;
+        if (target !== 'PASS') {
+            const playerIndex = this.manager.getPlayerIndexFromId(target, game);
+            const playerName = game.players[playerIndex].name;
+            const userIndex = this.manager.getPlayerIndexFromId(user.id, game);
+            game = this.manager.swapHands(playerIndex, userIndex, game);
+            const givenToPlayer = game.players[playerIndex].hand[0];
+            const givenToUser = game.players[userIndex].hand[0];
+            text = `Il Re di ${user.username} scambia la sua carta con quella di ${playerName}`;
+            textTarget = `Hai scambiato ${this.style(givenToUser)} per ${this.style(givenToPlayer)}`;
+            textUser = `Hai scambiato ${this.style(givenToPlayer)} per ${this.style(givenToUser)}`;
+        } else {
+            text = `Il Re di ${user.username} non fa nulla`;
+        }
+        this.games[this.players[user.id]] = game;
+        const gameId = game.id;
+        await this.sendMessageToGroup({
+            gameId, text
+        });
+        if (textTarget) {
+            await this.sendMessage(target, textTarget);
+        }
+        if (textUser) {
+            await this.sendMessage(user.id, textUser);
+        }
+        return await this.handlePostPlayEvents(game.id);
+    }
+
+    async handleContess(userId) {
+        let game = this.games[this.players[userId]];
+        game = this.manager.play(game, 7);
+        const index = this.manager.getPlayerIndexFromId(userId, game);
+        const player = game.players[index];
+        const text = `${player.name} ha scartato la Contessa\\.\\.\\.`;
+        this.games[this.players[userId]] = game;
+        const gameId = game.id;
+        await this.sendMessageToGroup({
+            gameId, text
+        });
         return await this.handlePostPlayEvents(game.id);
     }
 

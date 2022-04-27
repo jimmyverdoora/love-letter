@@ -150,6 +150,14 @@ class GameManager {
         return game;
     }
 
+    swapHands(index1, index2, game) {
+        const card1 = game.players[index1].hand.splice(0, 1);
+        const card2 = game.players[index2].hand.splice(0, 1);
+        game.players[index1].hand.push(card2);
+        game.players[index2].hand.push(card1);
+        return game;
+    }
+
     shuffle(deck) {
         for (let i = deck.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
