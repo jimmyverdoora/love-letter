@@ -54,11 +54,11 @@ const generateDeck = () => [
         name: 'Barone',
         number: 3
     },
-    // {
-    //     id: '3b',
-    //     name: 'Barone',
-    //     number: 3
-    // },
+    {
+        id: '3b',
+        name: 'Barone',
+        number: 3
+    },
     // {
     //     id: '4a',
     //     name: 'Ancella',
