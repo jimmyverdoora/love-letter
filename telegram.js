@@ -19,7 +19,9 @@ class Telegram {
     // -------------------------------------------------------------------------
 
     async tg(path, payload) {
-        console.log(payload)
+        if (payload.reply_markup) {
+            console.log(payload.reply_markup.inline_keyboard)
+        }
         return await axios.post(TELEGRAM_URL + path, payload);
     }
 
@@ -173,7 +175,7 @@ class Telegram {
 
     async exit(user) {
         this.waitingForEnter.delete(user);
-        const gameId = this.players[user]; 
+        const gameId = this.players[user];
         if (gameId && this.games[gameId]) {
             let index = -1;
             let count = 0;
@@ -190,7 +192,7 @@ class Telegram {
             if (this.games[gameId].players.length === 0) {
                 delete this.games[gameId];
             }
-        } 
+        }
         delete this.players[user];
         await this.sendMessage(user, "Bye\\! Torna a giocare presto");
         const actives = [];
@@ -206,8 +208,10 @@ class Telegram {
             await this.sendMessageToGroup({ text: "Game over\\!", gameId });
             return this.endGame(gameId);
         } else if (actives.length === 1) {
-            await this.sendMessageToGroup({ gameId, text: "Game over\\! Ha vinto " +
-            this.games[gameId].players[actives[0]].name })
+            await this.sendMessageToGroup({
+                gameId, text: "Game over\\! Ha vinto " +
+                    this.games[gameId].players[actives[0]].name
+            })
             return this.endGame(gameId);
         }
     }
@@ -237,7 +241,7 @@ class Telegram {
     async handleCardPlayed(cardId, user) {
         const game = this.games[this.players[user.id]];
         if (!this.manager.playerCanPlay(user, cardId, game)) {
-            return await this.sendMessage(user.id, "Non puoi giocare " + 
+            return await this.sendMessage(user.id, "Non puoi giocare " +
                 "questa carta in questo momento, non trollare");
         }
         if (cardId.charAt(0) === '1') {
@@ -271,8 +275,10 @@ class Telegram {
             await this.sendMessageToGroup({ gameId, text: "Game over\\!" });
             return this.endGame(gameId);
         } else if (actives.length === 1) {
-            await this.sendMessageToGroup({ gameId, text: "Game over\\! Ha vinto " +
-                game.players[actives[0]].name })
+            await this.sendMessageToGroup({
+                gameId, text: "Game over\\! Ha vinto " +
+                    game.players[actives[0]].name
+            })
             return this.endGame(gameId);
         }
         if (game.deck.length === 0) {
@@ -283,22 +289,24 @@ class Telegram {
         this.games[gameId] = game;
         return await this.askActivePlayerWhatToPlay(
             game.players[game.activePlayer]);
-    
+
     }
 
     async showOff(game) {
-        let best = {player: null, card: 0};
+        let best = { player: null, card: 0 };
         for (const player of game.players) {
             if (player.state !== 'out' && player.hand[0].number > best.card) {
-                best = {player, card: player.hand[0].number}
+                best = { player, card: player.hand[0].number }
             } else if (player.state !== 'out' && player.hand[0].number === best.card) {
-                if (player.pile.reduce((a, b) => a+b) > best.player.pile.reduce((a, b) => a+b)) {
-                    best = {player, card: player.hand[0].number}
+                if (player.pile.reduce((a, b) => a + b) > best.player.pile.reduce((a, b) => a + b)) {
+                    best = { player, card: player.hand[0].number }
                 }
             }
         }
-        return await this.sendMessageToGroup({ gameId: game.id, text: "Gameover\\! Ha vinto " +
-            best.player.name + " con " + this.style(best.player.hand[0])});
+        return await this.sendMessageToGroup({
+            gameId: game.id, text: "Gameover\\! Ha vinto " +
+                best.player.name + " con " + this.style(best.player.hand[0])
+        });
     }
 
     async sendMessageToGroup(message) {
