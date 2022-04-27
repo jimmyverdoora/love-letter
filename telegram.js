@@ -374,8 +374,8 @@ class Telegram {
     }
 
     async handleGuard2(value, user) {
-        const game = this.games[this.players[user.id]];
-        this.games[this.players[user.id]] = this.manager.play(game, 1);
+        let game = this.games[this.players[user.id]];
+        game = this.manager.play(game, 1);
         let text;
         if (value !== 'PASS') {
             const splitted = value.split('-');
@@ -383,7 +383,7 @@ class Telegram {
             const target = splitted[1];
             const name = this.manager.getPlayerNameFromId(target, game);
             if (this.manager.checkIfHasCard(target, value, game)) {
-                this.games[this.players[user.id]] = this.manager.eliminatePlayer(target, game);
+                game = this.manager.eliminatePlayer(target, game);
                 text = `La Guardia di ${user.username} sgama ${this.styleFromNumber(value)} ` +
                     `a ${name}\\! Get rekt\\!`;
             } else {
@@ -394,6 +394,7 @@ class Telegram {
         } else {
             text = `La Guardia di ${user.username} non fa nulla`;
         }
+        this.games[this.players[user.id]] = game;
         const gameId = game.id;
         await this.sendMessageToGroup({
             gameId, text
@@ -449,8 +450,8 @@ class Telegram {
     }
 
     async handleBaron1(target, user) {
-        const game = this.games[this.players[user.id]];
-        this.games[this.players[user.id]] = this.manager.play(game, 3);
+        let game = this.games[this.players[user.id]];
+        game = this.manager.play(game, 3);
         let text;
         if (target !== 'PASS') {
             user = game.players[this.manager.getPlayerIndexFromId(user.id, game)];
@@ -458,11 +459,11 @@ class Telegram {
             if (user.hand[0].number > player.hand[0].number) {
                 text = `${user.name} usa un Barone contro ${player.name}\\. La carta di ${user.name} rekta ` +
                     `${this.style(player.hand[0])} di ${player.name}\\!`;
-                this.games[this.players[user.id]] = this.manager.eliminatePlayer(player.id, game);
+                game = this.manager.eliminatePlayer(player.id, game);
             } else if (user.hand[0].number < player.hand[0].number) {
                 text = `${user.name} usa un Barone contro ${player.name}\\. La carta di ${player.name} rekta ` +
                     `${this.style(user.hand[0])} di ${user.name}\\!`;
-                this.games[this.players[user.id]] = this.manager.eliminatePlayer(user.id, game);
+                game = this.manager.eliminatePlayer(user.id, game);
             } else {
                 text = `${user.name} usa un Barone contro ${player.name}\\. La carte di ${user.name} e ` +
                     `${player.name} sono uguali\\!`;
@@ -470,6 +471,7 @@ class Telegram {
         } else {
             text = `Il Barone di ${user.username} non fa nulla`;
         }
+        this.games[this.players[user.id]] = game;
         const gameId = game.id;
         await this.sendMessageToGroup({
             gameId, text
@@ -505,7 +507,7 @@ class Telegram {
 
     async handlePrince1(target, user) {
         let game = this.games[this.players[user.id]];
-        this.games[this.players[user.id]] = this.manager.play(game, 5);
+        game = this.manager.play(game, 5);
         let text, text2;
         if (target !== 'PASS') {
             const playerIndex = this.manager.getPlayerIndexFromId(target, game);
@@ -524,19 +526,35 @@ class Telegram {
                 game.players[playerIndex].hand.push(cardDrown);
                 text2 = `Hai pescato ${this.style(cardDrown)}`;
             }
-            this.games[this.players[user.id]] = game;
         } else {
             text = `Il Principe di ${user.username} non fa nulla`;
         }
+        this.games[this.players[user.id]] = game;
         const gameId = game.id;
         await this.sendMessageToGroup({
             gameId, text
-        }); 
+        });
         if (text2) {
             await this.sendMessage(target, text2);
         }
         return await this.handlePostPlayEvents(game.id);
     }
+
+    async handlePrincess(userId) {
+        let game = this.games[this.players[userId]];
+        game = this.manager.play(game, 8);
+        const index = this.manager.getPlayerIndexFromId(userId, game);
+        const player = game.players[index];
+        const text = `${player.name} ha scartato la Principessa\\. Get rekt\\!`;
+        game.players[playerIndex].state = 'out';
+        this.games[this.players[userId]] = game;
+        const gameId = game.id;
+        await this.sendMessageToGroup({
+            gameId, text
+        });
+        return await this.handlePostPlayEvents(game.id);
+    }
+
 
     // -----------------------
 
