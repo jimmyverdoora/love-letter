@@ -316,7 +316,7 @@ class Telegram {
             if (player.state !== 'out' && player.hand[0].number > best.card) {
                 best = { player, card: player.hand[0].number }
             } else if (player.state !== 'out' && player.hand[0].number === best.card) {
-                if (player.pile.reduce((a, b) => a + b) > best.player.pile.reduce((a, b) => a + b)) {
+                if (player.pile.reduce((a, b) => a + b, 0) > best.player.pile.reduce((a, b) => a + b, 0)) {
                     best = { player, card: player.hand[0].number }
                 }
             }
