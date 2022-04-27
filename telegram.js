@@ -19,6 +19,7 @@ class Telegram {
     // -------------------------------------------------------------------------
 
     async tg(path, payload) {
+        console.log(payload)
         return await axios.post(TELEGRAM_URL + path, payload);
     }
 
@@ -346,8 +347,8 @@ class Telegram {
             this.buildKeyboard(...buttons));
     }
 
-    async handleGuard2(value, userId) {
-        const game = this.games[this.players[userId]];
+    async handleGuard2(value, user) {
+        const game = this.games[this.players[user.id]];
         this.manager.play(game, 1);
         if (value !== 'PASS') {
             const splitted = value.split('-');
