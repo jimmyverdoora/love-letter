@@ -79,6 +79,8 @@ class GameManager {
     }
 
     getPlayerNameFromId(id, game) {
+        console.log(game.players);
+        console.log(typeof id);
         for (let i = 0; i < game.players.length; i++) {
             if (game.players[i].id === id) {
                 return game.players[i].name;
