@@ -44,6 +44,7 @@ class Telegram {
     // -------------------------------------------------------------------------
 
     async elaborate(body) {
+        console.log(this.players);
         if (body.callback_query) {
             return await this.elaborateQuery(body.callback_query);
         } else if (!body.message) {
@@ -234,8 +235,6 @@ class Telegram {
     }
 
     async handleCardPlayed(cardId, user) {
-        console.log(user);
-        console.log(this.players);
         const game = this.games[this.players[user.id]];
         if (!this.manager.playerCanPlay(user, cardId, game)) {
             return await this.sendMessage(user.id, "Non puoi giocare " + 
