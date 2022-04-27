@@ -478,10 +478,9 @@ class Telegram {
     async handleAncel(userId) {
         const game = this.games[this.players[userId]];
         this.games[this.players[userId]] = this.manager.play(game, 4);
-        let text;
-        const index = this.manager.getPlayerIndexFromId(target, game);
+        const index = this.manager.getPlayerIndexFromId(userId, game);
         const player = game.players[index];
-        text = `La Ancella di ${player.name} lo protegge fino al prossimo turno`;
+        const text = `La Ancella di ${player.name} lo protegge fino al prossimo turno`;
         const gameId = game.id;
         await this.sendMessageToGroup({
             gameId, text
