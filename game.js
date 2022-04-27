@@ -153,8 +153,8 @@ class GameManager {
     swapHands(index1, index2, game) {
         const card1 = game.players[index1].hand.splice(0, 1);
         const card2 = game.players[index2].hand.splice(0, 1);
-        game.players[index1].hand.push(card2);
-        game.players[index2].hand.push(card1);
+        game.players[index1].hand.push(card2[0]);
+        game.players[index2].hand.push(card1[0]);
         return game;
     }
 
