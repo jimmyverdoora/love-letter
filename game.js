@@ -161,7 +161,7 @@ class GameManager {
         for (const p of game.players) {
             status += `${p.state === 'in' ? '🟢' : p.state === 'out' ? '🔴' : '🔵'} *${p.name}*\n`;
             if (p.id == userId) {
-                status += `[${p.hand.map(c => c.name).join(' \\- ')}]\n`
+                status += `\\[${p.hand.map(c => c.name).join(' \\- ')}\\]\n`
             }
             for (const c of p.pile) {
                 status += `\\- ${c.name}\n`;
