@@ -1,1 +1,1 @@
-module.exports = 'Te dico fermate fratellì';
+module.exports = 'Vai a leggerti le regole noob';
