@@ -400,7 +400,7 @@ class Telegram {
         const game = this.games[this.players[user.id]];
         this.games[this.players[user.id]] = this.manager.play(game, 1);
         let text, text2;
-        if (value !== 'PASS') { 
+        if (target !== 'PASS') { 
             const player = game.players[this.manager.getPlayerIndexFromId(target, game)];
             text = `Il Prete di ${user.username} guarda la mano a ${player.name}`;
             text2 = `${player.name} ha in mano ${this.style(player.hand[0])}`;
