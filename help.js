@@ -1,1 +1,1 @@
-module.exports = 'Vai a leggerti le regole noob \\U0001F916';
+module.exports = 'Vai a leggerti le regole noob %F0%9F%98%80';
