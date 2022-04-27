@@ -88,7 +88,7 @@ class GameManager {
     }
 
     eliminatePlayer(id, game) {
-        const playerIndex = this.manager.getPlayerIndexFromId(id, game);
+        const playerIndex = this.getPlayerIndexFromId(id, game);
         game.players[playerIndex].state = 'out';
         for (const card of game.players[playerIndex].hand) {
             game.players[playerIndex].pile.push(card);
