@@ -361,7 +361,7 @@ class Telegram {
         let text;
         if (value !== 'PASS') {
             const splitted = value.split('-');
-            const value = parseInt(splitted[0]);
+            value = parseInt(splitted[0]);
             const target = splitted[1];
             const name = this.manager.getPlayerNameFromId(target, game);
             if (this.manager.checkIfHasCard(target, value, game)) {
