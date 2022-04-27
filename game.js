@@ -108,19 +108,19 @@ class GameManager {
         }
         if (newActive === game.players.length) {
             newActive = 0;
-            while (newActive < activePlayer) {
+            while (newActive < game.activePlayer) {
                 if (game.players[newActive].state !== 'out') {
                     break
                 } else {
                     newActive = newActive + 1;
                 }
             }
-            if (newActive === activePlayer) {
+            if (newActive === game.activePlayer) {
                 throw new Error("Impossible to find next active player");
             }
         }
         game.activePlayer = newActive;
-        game.players[activePlayer].hand.push(this.draw(game));
+        game.players[game.activePlayer].hand.push(this.draw(game));
         return game;
 
     }
