@@ -367,14 +367,14 @@ class Telegram {
             if (this.manager.checkIfHasCard(target, value, game)) {
                 this.games[this.players[user.id]] = this.manager.eliminatePlayer(target, game);
                 text = `La guardia di ${user.username} sgama ${this.styleFromNumber(value)} ` +
-                    `a ${name}! Get rekt!`;
+                    `a ${name}\\! Get rekt\\!`;
             } else {
                 text = `La guardia di ${user.username} non sgama ${this.styleFromNumber(value)} ` +
-                    `a ${name}...`;
+                    `a ${name}`;
             }
 
         } else {
-            text = `La guardia di ${user.username} non fa nulla...`;
+            text = `La guardia di ${user.username} non fa nulla`;
         }
         const gameId = game.id;
         await this.sendMessageToGroup({
