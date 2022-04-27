@@ -65,8 +65,6 @@ class Telegram {
         } else if (message === 'exit') {
             await this.exit(fullMessage.from.id);
         } else if (message === 'status') {
-            console.log(this.players)
-            console.log(this.games)
             await this.status(fullMessage.from.id);
         } else if (message === 'help') {
             await this.sendMessage(fullMessage.from.id, HELP_TEXT);
@@ -182,7 +180,7 @@ class Telegram {
     async status(user) {
         const gameId = this.players[user];
         if (gameId && this.games[gameId]) {
-            await this.sendMessage(user, this.manager.getStatus(this.games[gameId]));
+            await this.sendMessage(user, this.manager.getStatus(this.games[gameId], user));
         } else {
             await this.sendMessage(user, "Non stai partecipando a nessuna partita");
         }

@@ -156,10 +156,13 @@ class GameManager {
         return game.players[game.activePlayer];
     }
 
-    getStatus(game) {
+    getStatus(game, userId) {
         let status = '*Carte rimanenti:* ' + game.deck.length + '\n';
         for (const p of game.players) {
             status += `${p.state === 'in' ? '🟢' : p.state === 'out' ? '🔴' : '🔵'} *${p.name}*\n`;
+            if (p.id == userId) {
+                status += `[${p.hand.map(c => c.name).join(' \\- ')}]\n`
+            }
             for (const c of p.pile) {
                 status += `\\- ${c.name}\n`;
             }
