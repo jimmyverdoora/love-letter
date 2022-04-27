@@ -18,7 +18,7 @@ class Telegram {
     // Telegram interface ------------------------------------------------------
     // -------------------------------------------------------------------------
 
-    async tg(path, payload) { 
+    async tg(path, payload) {
         return await axios.post(TELEGRAM_URL + path, payload);
     }
 
@@ -102,7 +102,7 @@ class Telegram {
         ['2', '3', '4', '5'].forEach(n => buttons.push(
             this.buildButton(n, 'nPlayers:' + n)))
         await this.sendMessage(user, "Per quanti giocatori è questa partita?",
-            this.buildKeyboard(buttons));
+            this.buildKeyboard([buttons]));
     }
 
     async initGame(players, user) {
@@ -144,7 +144,7 @@ class Telegram {
                 "aperte\\! Creane una tu con il comando /new");
         }
         return await this.sendMessage(user, "Scegli in che partita entrare",
-            this.buildKeyboard(...buttons));
+            this.buildKeyboard(buttons));
     }
 
     async tryJoinTheRoom(id, from) {
@@ -230,7 +230,7 @@ class Telegram {
         player.hand.forEach(card => buttons.push(this.buildButton(
             card.name, 'play:' + card.id
         )));
-        const keyboard = this.buildKeyboard(buttons);
+        const keyboard = this.buildKeyboard([buttons]);
         return await this.sendMessage(player.id, "Hai pescato " +
             this.style(player.hand[1]) + "\\. Cosa giochi?", keyboard);
     }
@@ -336,7 +336,7 @@ class Telegram {
         buttons[3].push(this.buildButton("Principessa", 'guard1:8'));
         buttons[3].push(this.buildButton("PASSA", 'guard2:PASS'));
         return await this.sendMessage(userId, "Scegli che carta chiedere",
-            this.buildKeyboard(...buttons));
+            this.buildKeyboard(buttons));
     }
 
     async handleGuard1(value, user) {
@@ -389,9 +389,9 @@ class Telegram {
         };
     }
 
-    buildKeyboard(buttons) { 
+    buildKeyboard(buttons) {
         return {
-            inline_keyboard: [buttons]
+            inline_keyboard: buttons
         };
     }
 
