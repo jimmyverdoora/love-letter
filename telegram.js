@@ -65,6 +65,8 @@ class Telegram {
         } else if (message === 'exit') {
             await this.exit(fullMessage.from.id);
         } else if (message === 'status') {
+            console.log(this.players)
+            console.log(this.games)
             await this.status(fullMessage.from.id);
         } else if (message === 'help') {
             await this.sendMessage(fullMessage.from.id, HELP_TEXT);
