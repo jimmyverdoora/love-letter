@@ -342,9 +342,8 @@ class Telegram {
     async handleGuard1(value, user) {
         const game = this.games[this.players[user.id]];
         const buttons = [];
-        console.log(game.players)
         for (const u of game.players) {
-            if (u.status === 'in') {
+            if (u.state === 'in') {
                 buttons.push([this.buildButton(u.name, `guard2:${value}-${u.id}`)]);
             }
         }

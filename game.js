@@ -97,8 +97,8 @@ class GameManager {
         if (index < 0) {
             throw new Error(`Cannot find ${cardNumber} in this hand: ${player.hand}`);
         }
-        const card = this.games[gameId].players[game.activePlayer].hand.splice(index, 1);
-        this.games[gameId].players[game.activePlayer].pile.push(card);
+        const card = this.games[game.id].players[game.activePlayer].hand.splice(index, 1);
+        this.games[game.id].players[game.activePlayer].pile.push(card);
     }
 
     shuffle(deck) {
