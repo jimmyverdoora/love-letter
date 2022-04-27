@@ -1,0 +1,1 @@
+module.exports = 'Vai a leggerti le regole LOL';
