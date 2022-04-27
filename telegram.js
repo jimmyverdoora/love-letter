@@ -44,7 +44,6 @@ class Telegram {
     // -------------------------------------------------------------------------
 
     async elaborate(body) {
-        console.log(this.players);
         if (body.callback_query) {
             return await this.elaborateQuery(body.callback_query);
         } else if (!body.message) {
@@ -241,7 +240,7 @@ class Telegram {
                 "questa carta in questo momento, non trollare");
         }
         if (cardId.charAt(0) === '1') {
-            return await this.handleGuard(game.id, user.id);
+            return await this.handleGuard(user.id);
         } else if (cardId.charAt(0) === '2') {
             return await this.handlePriest(game.id);
         } else if (cardId.charAt(0) === '3') {
