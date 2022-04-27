@@ -18,10 +18,7 @@ class Telegram {
     // Telegram interface ------------------------------------------------------
     // -------------------------------------------------------------------------
 
-    async tg(path, payload) {
-        if (payload.reply_markup) {
-            console.log(payload.reply_markup.inline_keyboard)
-        }
+    async tg(path, payload) { 
         return await axios.post(TELEGRAM_URL + path, payload);
     }
 
@@ -392,6 +389,7 @@ class Telegram {
     }
 
     buildKeyboard(buttons) {
+        console.log(buttons);
         return {
             inline_keyboard: [buttons]
         };
