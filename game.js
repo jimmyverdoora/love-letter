@@ -49,6 +49,7 @@ class GameManager {
     }
 
     playerCanPlay(player, cardId, game) {
+        console.log(game)
         if (game.players[game.activePlayer].id === player.id);
             for (const c of game.players[game.activePlayer].hand) {
                 if (c.id === cardId) {
