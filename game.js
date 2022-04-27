@@ -49,13 +49,31 @@ class GameManager {
     }
 
     playerCanPlay(player, cardId, game) {
-        if (game.players[game.activePlayer].id === player.id);
-        for (const c of game.players[game.activePlayer].hand) {
-            if (c.id === cardId) {
-                return true;
+        if (game.players[game.activePlayer].id === player.id) {
+            if (cardId !== '7' && this.checkContess(game)) {
+                return false;
+            }
+            for (const c of game.players[game.activePlayer].hand) {
+                if (c.id === cardId) {
+                    return true;
+                }
             }
         }
         return false;
+    }
+
+    checkContess(game) {
+        let hasContess, hasPrince, hasKing;
+        for (const c of game.players[game.activePlayer].hand) {
+            if (c.number === 5) {
+                hasPrince = true;
+            } else if (c.number === 6) {
+                hasKing = true;
+            } else if (c.number === 7) {
+                hasContess = true;
+            }
+        }
+        return hasContess && (hasKing || hasPrince);
     }
 
     checkIfHasCard(playerId, cardNumber, game) {
