@@ -50,12 +50,51 @@ class GameManager {
 
     playerCanPlay(player, cardId, game) {
         if (game.players[game.activePlayer].id === player.id);
-            for (const c of game.players[game.activePlayer].hand) {
-                if (c.id === cardId) {
-                    return true;
-                }
+        for (const c of game.players[game.activePlayer].hand) {
+            if (c.id === cardId) {
+                return true;
             }
+        }
         return false;
+    }
+
+    checkIfHasCard(playerId, cardNumber, game) {
+        const player = game.players[this.getPlayerIndexFromId(playerId, game)];
+        for (const c of player.hand) {
+            if (c.number === cardNumber) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    getPlayerIndexFromId(id, game) {
+        for (let i = 0; i < game.players.length; i++) {
+            if (game.players[i].id === id) {
+                return i;
+            }
+        }
+        throw Error("Cannot find player " + id);
+
+    }
+
+    getPlayerNameFromId(id, game) {
+        for (let i = 0; i < game.players.length; i++) {
+            if (game.players[i].id === id) {
+                return game.players[i].name;
+            }
+        }
+        throw Error("Cannot find player " + id);
+    }
+
+    eliminatePlayer(id, game) {
+        const playerIndex = this.manager.getPlayerIndexFromId(id, game);
+        game.players[playerIndex].state = 'out';
+        for (const card of game.players[playerIndex].hand) {
+            game.players[playerIndex].pile.push(card);
+        }
+        game.players[playerIndex].hand = [];
+        return game;
     }
 
     progress(game) {
@@ -97,8 +136,9 @@ class GameManager {
         if (index < 0) {
             throw new Error(`Cannot find ${cardNumber} in this hand: ${player.hand}`);
         }
-        const card = this.games[game.id].players[game.activePlayer].hand.splice(index, 1);
-        this.games[game.id].players[game.activePlayer].pile.push(card);
+        const card = game.players[game.activePlayer].hand.splice(index, 1);
+        game.players[game.activePlayer].pile.push(card);
+        return game;
     }
 
     shuffle(deck) {

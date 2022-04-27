@@ -1,5 +1,6 @@
 const axios = require('axios');
 const GameManager = require('./game');
+const generateDeck = require('./deck');
 const HELP_TEXT = require('./help');
 
 const GAME_LIMIT = 16;
@@ -275,7 +276,7 @@ class Telegram {
             await this.sendMessageToGroup({
                 gameId, text: "Game over\\! Ha vinto " +
                     game.players[actives[0]].name
-            })
+            });
             return this.endGame(gameId);
         }
         if (game.deck.length === 0) {
@@ -284,6 +285,8 @@ class Telegram {
         }
         game = this.manager.progress(game);
         this.games[gameId] = game;
+        console.log(game.deck);
+        console.log(game.players);
         return await this.askActivePlayerWhatToPlay(
             game.players[game.activePlayer]);
 
@@ -343,7 +346,7 @@ class Telegram {
         const game = this.games[this.players[user.id]];
         const buttons = [];
         for (const u of game.players) {
-            if (u.state === 'in') {
+            if (u.state === 'in' && u.id !== user.id) {
                 buttons.push([this.buildButton(u.name, `guard2:${value}-${u.id}`)]);
             }
         }
@@ -354,11 +357,29 @@ class Telegram {
 
     async handleGuard2(value, user) {
         const game = this.games[this.players[user.id]];
-        this.manager.play(game, 1);
+        this.games[this.players[user.id]] = this.manager.play(game, 1);
+        let text;
         if (value !== 'PASS') {
             const splitted = value.split('-');
-            // todo
+            const value = parseInt(splitted[0]);
+            const target = splitted[1];
+            const name = this.manager.getPlayerNameFromId(target, game);
+            if (this.manager.checkIfHasCard(target, value, game)) {
+                this.games[this.players[user.id]] = this.manager.eliminatePlayer(target, game);
+                text = `La guardia di ${user.username} sgama ${this.styleFromNumber(value)} ` +
+                    `a ${name}! Get rekt!`;
+            } else {
+                text = `La guardia di ${user.username} non sgama ${this.styleFromNumber(value)} ` +
+                    `a ${name}...`;
+            }
+
+        } else {
+            text = `La guardia di ${user.username} non fa nulla...`;
         }
+        const gameId = game.id;
+        await this.sendMessageToGroup({
+            gameId, text
+        });
         return await this.handlePostPlayEvents(game.id);
     }
 
@@ -392,6 +413,16 @@ class Telegram {
         return {
             inline_keyboard: buttons
         };
+    }
+
+    styleFromNumber(cardNumber) {
+        const deck = generateDeck();
+        for (const card of deck) {
+            if (card.number === cardNumber) {
+                return this.style(card);
+            }
+        }
+        return '';
     }
 
     style(card) {
