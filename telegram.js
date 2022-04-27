@@ -326,15 +326,15 @@ class Telegram {
     // ----------------- CARDS
 
     async handleGuard(userId) {
-        const buttons = [];
-        buttons.push([this.buildButton("Prete", 'guard1:2')]);
-        buttons.push([this.buildButton("Barone", 'guard1:3')]);
-        buttons.push([this.buildButton("Ancella", 'guard1:4')]);
-        buttons.push([this.buildButton("Principe", 'guard1:5')]);
-        buttons.push([this.buildButton("Re", 'guard1:6')]);
-        buttons.push([this.buildButton("Contessa", 'guard1:7')]);
-        buttons.push([this.buildButton("Principessa", 'guard1:8')]);
-        buttons.push([this.buildButton("PASSA", 'guard2:PASS')]);
+        const buttons = [[], [], [], []];
+        buttons[0].push(this.buildButton("Prete", 'guard1:2'));
+        buttons[0].push(this.buildButton("Barone", 'guard1:3'));
+        buttons[1].push(this.buildButton("Ancella", 'guard1:4'));
+        buttons[1].push(this.buildButton("Principe", 'guard1:5'));
+        buttons[2].push(this.buildButton("Re", 'guard1:6'));
+        buttons[2].push(this.buildButton("Contessa", 'guard1:7'));
+        buttons[3].push(this.buildButton("Principessa", 'guard1:8'));
+        buttons[3].push(this.buildButton("PASSA", 'guard2:PASS'));
         return await this.sendMessage(userId, "Scegli che carta chiedere",
             this.buildKeyboard(buttons));
     }
