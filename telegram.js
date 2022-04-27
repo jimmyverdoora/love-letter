@@ -254,6 +254,9 @@ class Telegram {
     }
 
     async handleCardPlayed(cardId, user) {
+        if (!user || !this.players[user.id]) {
+            return;
+        }
         const game = this.games[this.players[user.id]];
         if (!this.manager.playerCanPlay(user, cardId, game)) {
             return await this.sendMessage(user.id, "Non puoi giocare " +
