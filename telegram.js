@@ -336,12 +336,13 @@ class Telegram {
         buttons.push([this.buildButton("Principessa", 'guard1:8')]);
         buttons.push([this.buildButton("PASSA", 'guard2:PASS')]);
         return await this.sendMessage(userId, "Scegli che carta chiedere",
-            this.buildKeyboard(...buttons));
+            this.buildKeyboard(buttons));
     }
 
     async handleGuard1(value, user) {
         const game = this.games[this.players[user.id]];
         const buttons = [];
+        console.log(game.players)
         for (const u of game.players) {
             if (u.status === 'in') {
                 buttons.push([this.buildButton(u.name, `guard2:${value}-${u.id}`)]);
@@ -349,7 +350,7 @@ class Telegram {
         }
         buttons.push([this.buildButton("PASSA", 'guard2:PASS')]);
         return await this.sendMessage(user.id, "Scegli il giocatore",
-            this.buildKeyboard(...buttons));
+            this.buildKeyboard(buttons));
     }
 
     async handleGuard2(value, user) {
@@ -388,8 +389,7 @@ class Telegram {
         };
     }
 
-    buildKeyboard(buttons) {
-        console.log(buttons);
+    buildKeyboard(buttons) { 
         return {
             inline_keyboard: [buttons]
         };
