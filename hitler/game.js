@@ -27,7 +27,7 @@ class GameManager {
         return {
             id,
             name,
-            role,
+            role: null,
             hand: [],
             currentVote: null,
             points: 0
