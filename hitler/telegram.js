@@ -334,7 +334,7 @@ class Telegram {
         return await this.sendMessage(game.players[game.cancelor].id, 'Che legge approvi?', keyboard);
     }
 
-    handlePlay(value, user) {
+    async handlePlay(value, user) {
         let game = this.games[this.players[user.id]];
         if (!game.cancelor) {
             return await this.sendMessage(user.id, "In cancelliere non e' ancora stato eletto\\!");
