@@ -93,15 +93,15 @@ class Telegram {
     }
 
     async createNewGame(message) {
-        const user = message.from.id;
-        if (this.players[user]) {
-            return await this.negateThisBecauseAlreadyInGame(user);
+        const user = message.from;
+        if (this.players[user.id]) {
+            return await this.negateThisBecauseAlreadyInGame(user.id);
         } else if (Object.keys(this.games).length > GAME_LIMIT) {
-            return await this.sendMessage(user, "Siamo pieni\\! Purtroppo non " +
+            return await this.sendMessage(user.id, "Siamo pieni\\! Purtroppo non " +
                 "si possono creare più di " + GAME_LIMIT + " partite");
         }
         const id = this.manager.createGameId();
-        this.players[user] = id;
+        this.players[user.id] = id;
         this.games[this.players[user.id]] = this.manager.createNewGame(5,
             this.players[user.id]);
         this.games[this.players[user.id]].players.push(
