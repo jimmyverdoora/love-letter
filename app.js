@@ -22,7 +22,7 @@ app.post(WEBHOOK_URL, async (req, res) => {
 });
 
 app.post(HITLER_WEBHOOK_URL, async (req, res) => {
-  await htelegram.elaborate(req.body);
+  await hTelegram.elaborate(req.body);
   res.status(200).send();
 });
 

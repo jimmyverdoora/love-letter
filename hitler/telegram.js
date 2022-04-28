@@ -85,6 +85,10 @@ class Telegram {
             return await this.handleCancelor(value, query.from);
         } else if (command === 'approve') {
             return await this.handleApprove(value, query.from);
+        } else if (command === 'discard') {
+            return await this.handleDiscard(value, query.from);
+        } else if (command === 'play') {
+            return await this.handlePlay(value, query.from);
         }
     }
 
@@ -155,7 +159,7 @@ class Telegram {
     async status(user) {
         const gameId = this.players[user];
         if (gameId && this.games[gameId]) {
-            await this.sendMessage(user, this.manager.getStatus(this.games[gameId], user));
+            await this.sendMessage(user, this.manager.getStatus(this.games[gameId]));
         } else {
             await this.sendMessage(user, "Non stai partecipando a nessuna partita");
         }
@@ -199,7 +203,7 @@ class Telegram {
                 await this.sendMessage(p.id, "Hitler e' " + hitler.name);
             }
         }
-        await this.sendMessageToGroup({ gameId, text: "Tocca a " + player.name });
+        await this.sendMessageToGroup({ gameId, text: "Il presidente e' " + player.name });
         return await this.askActivePlayerWhatToPlay(player);
     }
 
@@ -217,31 +221,24 @@ class Telegram {
 
     async handlePostPlayEvents(gameId) {
         let game = this.games[gameId];
-        const actives = [];
-        for (let i = 0; i < game.players.length; i++) {
-            if (game.players[i].state !== 'out') {
-                actives.push(i);
-            }
-        }
-        if (actives.length === 0) {
-            await this.sendMessageToGroup({ gameId, text: "Game over\\!" });
-            return this.endGame(gameId);
-        } else if (actives.length === 1) {
+        if (game.reds === 5) {
             await this.sendMessageToGroup({
-                gameId, text: "Game over\\! Ha vinto " +
-                    game.players[actives[0]].name
+                gameId, text: "Game over\\! Hanno vinto i Buoni\\!"
             });
             return this.endGame(gameId);
         }
-        if (game.deck.length === 0) {
-            await this.showOff(game);
+        if (game.blacks === 6) {
+            await this.sendMessageToGroup({
+                gameId, text: "Game over\\! Hanno vinto i Cattivi\\!"
+            });
             return this.endGame(gameId);
         }
         game = this.manager.progress(game);
         this.games[gameId] = game;
+        const player = this.manager.getActivePlayer(game);
+        await this.sendMessageToGroup({ gameId, text: "Il presidente e' " + player.name });
         return await this.askActivePlayerWhatToPlay(
             game.players[game.activePlayer]);
-
     }
 
     async sendMessageToGroup(message) {
@@ -264,17 +261,18 @@ class Telegram {
     // ----------------- ACTIONS
 
     async handleCancelor(target, user) {
-        const game = this.games[this.players[user.id]];
+        let game = this.games[this.players[user.id]];
         const name = this.manager.getPlayerNameFromId(target, game);
         const gameId = game.id;
         await this.sendMessageToGroup({
             gameId, text: `${user.username} sceglie ${name} come cancelliere\\.`
         });
-        const buttons = [[this.buildButton('SI', 'approve:Y'), this.buildButton('NO', 'approve:N')]]; 
+        this.games[gameId] = this.manager.setCancelor(target, game);
+        const buttons = [[this.buildButton('SI', 'approve:Y'), this.buildButton('NO', 'approve:N')]];
         for (const u of game.players) {
             await this.sendMessage(u.id, `Approvi ${name}?`,
                 this.buildKeyboard(buttons));
-        } 
+        }
     }
 
     async handleApprove(value, user) {
@@ -284,224 +282,73 @@ class Telegram {
             return await this.sendMessage(user.id, "Hai gia' votato\\!");
         }
         game.players[playerIndex].currentVote = value;
-        this.games[this.players[user.id]] = game;
-        await this.sendMessage(user.id, `${value === 'N' ? 'Non hai' : 'Hai' } approvato il cancelliere`);
-        if (this.manager.everyOneVoted(game)) {
-            // todo...
+        this.games[game.id] = game;
+        await this.sendMessage(user.id, `${value === 'N' ? 'Non hai' : 'Hai'} approvato il cancelliere`);
+        if (!this.manager.everyOneVoted(game)) {
+            return;
         }
-    }
-
-    async handlePriest(userId) {
-        const game = this.games[this.players[userId]];
-        const buttons = [];
-        for (const u of game.players) {
-            if (u.state === 'in' && u.id !== userId) {
-                buttons.push([this.buildButton(u.name, `priest:${u.id}`)]);
-            }
+        const { y, n } = this.manager.getVotes(game);
+        game = this.manager.cleanVotes(game);
+        const cancName = game.players[game.cancelor].name;
+        if (y <= n) {
+            this.games[game.id] = game;
+            await this.sendMessageToGroup({
+                gameId: game.id,
+                text: `${cancName} non e' stato approvato (${y} vs ${n})`
+            });
+            return await this.handlePostPlayEvents(game.id);
         }
-        buttons.push([this.buildButton("PASSA", 'priest:PASS')]);
-        return await this.sendMessage(userId, "Scegli il giocatore",
-            this.buildKeyboard(buttons));
-    }
-
-    async handlePriest1(target, user) {
-        const game = this.games[this.players[user.id]];
-        this.games[this.players[user.id]] = this.manager.play(game, 2);
-        let text, text2;
-        if (target !== 'PASS') {
-            const player = game.players[this.manager.getPlayerIndexFromId(target, game)];
-            text = `Il Prete di ${user.username} guarda la mano a ${player.name}`;
-            text2 = `${player.name} ha in mano ${this.style(player.hand[0])}`;
-        } else {
-            text = `Il Prete di ${user.username} non fa nulla`;
-        }
-        const gameId = game.id;
+        game = this.manager.draw3forPresident(game);
+        this.games[game.id] = game;
         await this.sendMessageToGroup({
-            gameId, text
+            gameId: game.id,
+            text: `${cancName} e' stato approvato (${y} vs ${n})`
         });
-        if (text2) {
-            await this.sendMessage(user.id, text2);
-        }
-        return await this.handlePostPlayEvents(game.id);
-    }
-
-    async handleBaron(userId) {
-        const game = this.games[this.players[userId]];
         const buttons = [];
-        for (const u of game.players) {
-            if (u.state === 'in' && u.id !== userId) {
-                buttons.push([this.buildButton(u.name, `baron:${u.id}`)]);
-            }
-        }
-        buttons.push([this.buildButton("PASSA", 'baron:PASS')]);
-        return await this.sendMessage(userId, "Scegli il giocatore",
-            this.buildKeyboard(buttons));
+        game.players[game.activePlayer].hand.forEach(card => buttons.push(
+            card ? this.buildButton(RED, 'discard:1') : this.buildButton(BLACK, 'discard:0')
+        ));
+        const keyboard = this.buildKeyboard([buttons]);
+        return await this.sendMessage(game.players[game.activePlayer].id,
+            'Scegli la carta da NON passare al cancelliere', keyboard);
     }
 
-    async handleBaron1(target, user) {
+    async handleDiscard(value, user) {
         let game = this.games[this.players[user.id]];
-        game = this.manager.play(game, 3);
-        let text;
-        if (target !== 'PASS') {
-            user = game.players[this.manager.getPlayerIndexFromId(user.id, game)];
-            const player = game.players[this.manager.getPlayerIndexFromId(target, game)];
-            if (user.hand[0].number > player.hand[0].number) {
-                text = `${user.name} usa un Barone contro ${player.name}\\. La carta di ${user.name} rekta ` +
-                    `${this.style(player.hand[0])} di ${player.name}\\!`;
-                game = this.manager.eliminatePlayer(player.id, game);
-            } else if (user.hand[0].number < player.hand[0].number) {
-                text = `${user.name} usa un Barone contro ${player.name}\\. La carta di ${player.name} rekta ` +
-                    `${this.style(user.hand[0])} di ${user.name}\\!`;
-                game = this.manager.eliminatePlayer(user.id, game);
-            } else {
-                text = `${user.name} usa un Barone contro ${player.name}\\. La carte di ${user.name} e ` +
-                    `${player.name} sono uguali\\!`;
-            }
-        } else {
-            text = `Il Barone di ${user.username} non fa nulla`;
+        if (!game.cancelor) {
+            return await this.sendMessage(user.id, "In cancelliere non e' ancora stato eletto\\!");
         }
-        this.games[this.players[user.id]] = game;
-        const gameId = game.id;
+        if (game.players[game.activePlayer].id != user.id) {
+            return await this.sendMessage(user.id, "Non sei il presidente\\!");
+        }
+        this.games[game.id] = this.manager.pass2toCancelor(game, parseInt(value));
         await this.sendMessageToGroup({
-            gameId, text
+            gameId: game.id,
+            text: `${cancName} riceve 2 carte da ${user.username}\\.\\.\\.`
         });
-        return await this.handlePostPlayEvents(game.id);
-    }
-
-    async handleAncel(userId) {
-        const game = this.games[this.players[userId]];
-        this.games[this.players[userId]] = this.manager.play(game, 4);
-        const index = this.manager.getPlayerIndexFromId(userId, game);
-        const player = game.players[index];
-        const text = `La Ancella di ${player.name} protegge fino al prossimo turno`;
-        const gameId = game.id;
-        await this.sendMessageToGroup({
-            gameId, text
-        });
-        return await this.handlePostPlayEvents(game.id);
-    }
-
-    async handlePrince(userId) {
-        const game = this.games[this.players[userId]];
         const buttons = [];
-        for (const u of game.players) {
-            if (u.state === 'in' && u.id !== userId) {
-                buttons.push([this.buildButton(u.name, `prince:${u.id}`)]);
-            }
-        }
-        buttons.push([this.buildButton("PASSA", 'prince:PASS')]);
-        return await this.sendMessage(userId, "Scegli il giocatore",
-            this.buildKeyboard(buttons));
+        game.players[game.cancelor].hand.forEach(card => buttons.push(
+            card ? this.buildButton(RED, 'play:1') : this.buildButton(BLACK, 'play:0')
+        ));
+        const keyboard = this.buildKeyboard([buttons]);
+        return await this.sendMessage(game.players[game.cancelor].id, 'Che legge approvi?', keyboard);
     }
 
-    async handlePrince1(target, user) {
+    handlePlay(value, user) {
         let game = this.games[this.players[user.id]];
-        game = this.manager.play(game, 5);
-        let text, text2;
-        if (target !== 'PASS') {
-            const playerIndex = this.manager.getPlayerIndexFromId(target, game);
-            const playerName = game.players[playerIndex].name;
-            game = this.manager.discard(game, playerIndex);
-            const discarded = game.players[playerIndex].pile.slice(-1)[0];
-            text = `Il Principe di ${user.username} elimina ${this.style(discarded)} di ${playerName}`;
-            if (discarded.number == 8) {
-                text += `\n${playerName} ha scartato la Principessa\\. Get rekt\\!`;
-                game.players[playerIndex].state = 'out';
-            } else if (game.deck.length === 0) {
-                text += `\n${playerName} non puo' pescare perche' il mazzo e' finito\\. Get rekt\\!`;
-                game.players[playerIndex].state = 'out';
-            } else {
-                const cardDrown = this.manager.draw(game);
-                game.players[playerIndex].hand.push(cardDrown);
-                text2 = `Hai pescato ${this.style(cardDrown)}`;
-            }
-        } else {
-            text = `Il Principe di ${user.username} non fa nulla`;
+        if (!game.cancelor) {
+            return await this.sendMessage(user.id, "In cancelliere non e' ancora stato eletto\\!");
         }
-        this.games[this.players[user.id]] = game;
-        const gameId = game.id;
+        if (game.players[game.cancelor].id != user.id) {
+            return await this.sendMessage(user.id, "Non sei il cancelliere\\!");
+        }
+        this.games[game.id] = this.manager.play(game, parseInt(value));
         await this.sendMessageToGroup({
-            gameId, text
-        });
-        if (text2) {
-            await this.sendMessage(target, text2);
-        }
-        return await this.handlePostPlayEvents(game.id);
-    }
-
-    async handleKing(userId) {
-        const game = this.games[this.players[userId]];
-        const buttons = [];
-        for (const u of game.players) {
-            if (u.state === 'in' && u.id !== userId) {
-                buttons.push([this.buildButton(u.name, `king:${u.id}`)]);
-            }
-        }
-        buttons.push([this.buildButton("PASSA", 'king:PASS')]);
-        return await this.sendMessage(userId, "Scegli il giocatore",
-            this.buildKeyboard(buttons));
-    }
-
-    async handleKing1(target, user) {
-        let game = this.games[this.players[user.id]];
-        game = this.manager.play(game, 6);
-        let text, textTarget, textUser;
-        if (target !== 'PASS') {
-            const playerIndex = this.manager.getPlayerIndexFromId(target, game);
-            const playerName = game.players[playerIndex].name;
-            const userIndex = this.manager.getPlayerIndexFromId(user.id, game);
-            game = this.manager.swapHands(playerIndex, userIndex, game);
-            const givenToPlayer = game.players[playerIndex].hand[0];
-            const givenToUser = game.players[userIndex].hand[0];
-            text = `Il Re di ${user.username} scambia la sua carta con quella di ${playerName}`;
-            textTarget = `Hai scambiato ${this.style(givenToUser)} per ${this.style(givenToPlayer)}`;
-            textUser = `Hai scambiato ${this.style(givenToPlayer)} per ${this.style(givenToUser)}`;
-        } else {
-            text = `Il Re di ${user.username} non fa nulla`;
-        }
-        this.games[this.players[user.id]] = game;
-        const gameId = game.id;
-        await this.sendMessageToGroup({
-            gameId, text
-        });
-        if (textTarget) {
-            await this.sendMessage(target, textTarget);
-        }
-        if (textUser) {
-            await this.sendMessage(user.id, textUser);
-        }
-        return await this.handlePostPlayEvents(game.id);
-    }
-
-    async handleContess(userId) {
-        let game = this.games[this.players[userId]];
-        game = this.manager.play(game, 7);
-        const index = this.manager.getPlayerIndexFromId(userId, game);
-        const player = game.players[index];
-        const text = `${player.name} ha scartato la Contessa\\.\\.\\.`;
-        this.games[this.players[userId]] = game;
-        const gameId = game.id;
-        await this.sendMessageToGroup({
-            gameId, text
+            gameId: game.id,
+            text: `${cancName} approva una legge ${parseInt(value) ? RED : BLACK}\\!`
         });
         return await this.handlePostPlayEvents(game.id);
     }
-
-    async handlePrincess(userId) {
-        let game = this.games[this.players[userId]];
-        game = this.manager.play(game, 8);
-        const index = this.manager.getPlayerIndexFromId(userId, game);
-        const player = game.players[index];
-        const text = `${player.name} ha scartato la Principessa\\. Get rekt\\!`;
-        game.players[index].state = 'out';
-        this.games[this.players[userId]] = game;
-        const gameId = game.id;
-        await this.sendMessageToGroup({
-            gameId, text
-        });
-        return await this.handlePostPlayEvents(game.id);
-    }
-
 
     // -----------------------
 
@@ -533,16 +380,6 @@ class Telegram {
         return {
             inline_keyboard: buttons
         };
-    }
-
-    styleFromNumber(cardNumber) {
-        const deck = generateDeck();
-        for (const card of deck) {
-            if (card.number === cardNumber) {
-                return this.style(card);
-            }
-        }
-        return '';
     }
 
     style(role) {
