@@ -21,16 +21,10 @@ app.post(WEBHOOK_URL, async (req, res) => {
   res.status(200).send();
 });
 
-app.post(HITLER_WEBHOOK_URL, async (req, res) => {
-  console.log('pre')
-  console.log(hTelegram.players);
+app.post(HITLER_WEBHOOK_URL, async (req, res) => { 
   await hTelegram.elaborate(req.body);
-  console.log('post')
-  console.log(hTelegram.players);
   res.status(200).send();
 });
-
-setInterval(() => console.log(hTelegram.players), 500);
 
 app.listen(process.env.PORT, () => {
   console.log('Listening to requests');
