@@ -47,7 +47,7 @@ class Telegram {
     async elaborate(body) {
         if (body.callback_query) {
             return await this.elaborateQuery(body.callback_query);
-        } else if (!body.message) {
+        } else if (!body.message || !body.message.text) {
             return;
         } else if (body.message.text.charAt(0) === '/') {
             return await this.elaborateCommand(body.message);
