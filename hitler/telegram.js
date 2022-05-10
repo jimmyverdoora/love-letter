@@ -108,9 +108,11 @@ class Telegram {
             this.players[user.id]);
         this.games[this.players[user.id]].players.push(
             this.manager.createPlayer(user.id, user.username));
-        return await this.sendMessage(user.id, "Invita gli altri giocatori con " +
+        await this.sendMessage(user.id, "Invita gli altri giocatori con " +
             "l'identificativo della partita: " + this.players[user.id]
                 .split('-').join('\\-'));
+        console.log(this.players)
+        console.log(this.games)
     }
 
     async negateThisBecauseAlreadyInGame(user) {
