@@ -45,9 +45,7 @@ class Telegram {
     // Other methods -----------------------------------------------------------
     // -------------------------------------------------------------------------
 
-    async elaborate(body) {
-        console.log(this.players)
-        console.log(this.games)
+    async elaborate(body) { 
         if (body.callback_query) {
             return await this.elaborateQuery(body.callback_query);
         } else if (!body.message || !body.message.text) {
@@ -111,8 +109,6 @@ class Telegram {
         await this.sendMessage(user.id, "Invita gli altri giocatori con " +
             "l'identificativo della partita: " + this.players[user.id]
                 .split('-').join('\\-'));
-        console.log(this.players)
-        console.log(this.games)
     }
 
     async negateThisBecauseAlreadyInGame(user) {
