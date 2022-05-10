@@ -48,7 +48,7 @@ class Telegram {
     async elaborate(body) {
         if (body.callback_query) {
             return await this.elaborateQuery(body.callback_query);
-        } else if (!body.message) {
+        } else if (!body.message || !body.message.text) {
             return;
         } else if (body.message.text.charAt(0) === '/') {
             return await this.elaborateCommand(body.message);
@@ -106,6 +106,8 @@ class Telegram {
             this.players[user.id]);
         this.games[this.players[user.id]].players.push(
             this.manager.createPlayer(user.id, user.username));
+        console.log(this.players)
+        console.log(this.games)
         return await this.sendMessage(user.id, "Invita gli altri giocatori con " +
             "l'identificativo della partita: " + this.players[user.id]
                 .split('-').join('\\-'));
